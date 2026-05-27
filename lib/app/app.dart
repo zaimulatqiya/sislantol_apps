@@ -6,7 +6,12 @@ import '../core/theme/app_theme.dart';
 import '../blocs/auth/auth_bloc.dart';
 import '../blocs/laporan/laporan_bloc.dart';
 import '../blocs/penugasan/penugasan_bloc.dart';
+import '../features/splash/presentation/bloc/splash_cubit.dart';
+import '../data/datasources/mock_auth_datasource.dart';
+import '../data/datasources/mock_laporan_datasource.dart';
+import '../data/datasources/mock_penugasan_datasource.dart';
 
+import '../features/splash/presentation/screens/splash_screen.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/register_screen.dart';
 
@@ -28,16 +33,18 @@ class SislantolApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<AuthBloc>(create: (_) => AuthBloc()),
-        BlocProvider<LaporanBloc>(create: (_) => LaporanBloc()),
-        BlocProvider<PenugasanBloc>(create: (_) => PenugasanBloc()),
+        BlocProvider<AuthBloc>(create: (_) => AuthBloc(authDataSource: MockAuthDataSource())),
+        BlocProvider<LaporanBloc>(create: (_) => LaporanBloc(laporanDataSource: MockLaporanDataSource())),
+        BlocProvider<PenugasanBloc>(create: (_) => PenugasanBloc(penugasanDataSource: MockPenugasanDataSource())),
+        BlocProvider<SplashCubit>(create: (_) => SplashCubit()),
       ],
       child: MaterialApp(
         title: 'Sislantol',
         theme: AppTheme.lightTheme,
         debugShowCheckedModeBanner: false,
-        initialRoute: AppRoutes.login,
+        initialRoute: AppRoutes.splash,
         routes: {
+          AppRoutes.splash: (context) => const SplashScreen(),
           AppRoutes.login: (context) => const LoginScreen(),
           AppRoutes.register: (context) => const RegisterScreen(),
           

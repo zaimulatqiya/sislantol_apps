@@ -1,58 +1,24 @@
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/laporan_model.dart';
-import '../../data/mock_data.dart';
+import '../../data/datasources/mock_laporan_datasource.dart';
 import 'laporan_event.dart';
 import 'laporan_state.dart';
 
 class LaporanBloc extends Bloc<LaporanEvent, LaporanState> {
-  static const String _laporanKey = 'laporan_list';
-  bool _isInitialized = false;
+  final MockLaporanDataSource laporanDataSource;
 
-  LaporanBloc() : super(LaporanInitial()) {
+  LaporanBloc({required this.laporanDataSource}) : super(LaporanInitial()) {
     on<LoadLaporan>(_onLoadLaporan);
     on<LoadSemuaLaporan>(_onLoadSemuaLaporan);
     on<SubmitLaporan>(_onSubmitLaporan);
     on<DeleteLaporan>(_onDeleteLaporan);
   }
 
-  Future<void> _initDataIfNeeded() async {
-    if (_isInitialized) return;
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final String? laporanJson = prefs.getString(_laporanKey);
-      if (laporanJson != null) {
-        final List<dynamic> decoded = jsonDecode(laporanJson);
-        MockData.laporanList.clear();
-        MockData.laporanList.addAll(decoded.map((e) => LaporanModel.fromJson(e)).toList());
-      }
-      _isInitialized = true;
-    } catch (e) {
-      debugPrint('Error init data laporan: $e');
-      // Ignore initialization errors
-    }
-  }
-
-  Future<void> _saveData() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final List<Map<String, dynamic>> encoded = MockData.laporanList.map((e) => e.toJson()).toList();
-      await prefs.setString(_laporanKey, jsonEncode(encoded));
-    } catch (e) {
-      debugPrint('Error save data laporan: $e');
-      // Ignore saving errors
-    }
-  }
-
   Future<void> _onLoadLaporan(LoadLaporan event, Emitter<LaporanState> emit) async {
     emit(LaporanLoading());
-    await _initDataIfNeeded();
-    await Future.delayed(const Duration(milliseconds: 800)); // Simulate loading
-    
     try {
-      final laporanUser = MockData.laporanList.where((l) => l.userId == event.userId).toList();
+      final laporanUser = await laporanDataSource.getLaporanByUser(event.userId);
       // Sort desc by latest
       laporanUser.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       emit(LaporanLoaded(laporan: laporanUser));
@@ -63,10 +29,8 @@ class LaporanBloc extends Bloc<LaporanEvent, LaporanState> {
 
   Future<void> _onLoadSemuaLaporan(LoadSemuaLaporan event, Emitter<LaporanState> emit) async {
     emit(LaporanLoading());
-    await _initDataIfNeeded();
-    await Future.delayed(const Duration(milliseconds: 800));
     try {
-      final semuaLaporan = List<LaporanModel>.from(MockData.laporanList);
+      final semuaLaporan = await laporanDataSource.getAllLaporan();
       semuaLaporan.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       emit(LaporanLoaded(laporan: semuaLaporan));
     } catch (e) {
@@ -76,9 +40,6 @@ class LaporanBloc extends Bloc<LaporanEvent, LaporanState> {
 
   Future<void> _onSubmitLaporan(SubmitLaporan event, Emitter<LaporanState> emit) async {
     emit(LaporanLoading());
-    await _initDataIfNeeded();
-    await Future.delayed(const Duration(seconds: 1)); // Simulate api call
-    
     try {
       final newLaporan = LaporanModel(
         id: 'l${DateTime.now().millisecondsSinceEpoch}',
@@ -93,8 +54,7 @@ class LaporanBloc extends Bloc<LaporanEvent, LaporanState> {
         createdAt: DateTime.now(),
       );
 
-      MockData.laporanList.add(newLaporan);
-      await _saveData(); // Save to SharedPreferences
+      await laporanDataSource.addLaporan(newLaporan);
       emit(LaporanSubmitSuccess());
       // Re-load the specific user laporan
       add(LoadLaporan(userId: event.userId));
@@ -105,13 +65,8 @@ class LaporanBloc extends Bloc<LaporanEvent, LaporanState> {
 
   Future<void> _onDeleteLaporan(DeleteLaporan event, Emitter<LaporanState> emit) async {
     emit(LaporanLoading());
-    await _initDataIfNeeded();
-    await Future.delayed(const Duration(milliseconds: 500)); // Simulate api call
-    
     try {
-      MockData.laporanList.removeWhere((l) => l.id == event.id);
-      await _saveData(); // Save to SharedPreferences
-      
+      await laporanDataSource.deleteLaporan(event.id);
       // Re-load the specific user laporan
       add(LoadLaporan(userId: event.userId));
     } catch (e) {

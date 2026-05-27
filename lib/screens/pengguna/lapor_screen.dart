@@ -24,6 +24,7 @@ class _LaporScreenState extends State<LaporScreen> {
   String _jenisKejadian = 'mogok';
   final _lokasiController = TextEditingController();
   final _deskripsiController = TextEditingController();
+  final _jenisKejadianLainnyaController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   final ImagePicker _picker = ImagePicker();
@@ -93,6 +94,7 @@ class _LaporScreenState extends State<LaporScreen> {
   void dispose() {
     _lokasiController.dispose();
     _deskripsiController.dispose();
+    _jenisKejadianLainnyaController.dispose();
     super.dispose();
   }
 
@@ -115,12 +117,17 @@ class _LaporScreenState extends State<LaporScreen> {
         }
 
         if (!mounted) return;
+        
+        final String jenisKejadianKirim = _jenisKejadian == 'lainnya' 
+            ? _jenisKejadianLainnyaController.text 
+            : _jenisKejadian;
+
         context.read<LaporanBloc>().add(
               SubmitLaporan(
                 userId: authState.user.id,
                 pelaporNama: authState.user.nama,
                 pelaporNoHp: authState.user.noHp,
-                jenisKejadian: _jenisKejadian,
+                jenisKejadian: jenisKejadianKirim,
                 lokasi: _lokasiController.text,
                 deskripsi: _deskripsiController.text,
                 fotoPaths: finalFotoPaths,
@@ -194,52 +201,75 @@ class _LaporScreenState extends State<LaporScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Jenis Kejadian',
-                    style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textBody),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.border, width: 1),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: _jenisKejadian,
-                        isExpanded: true,
-                        dropdownColor: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        elevation: 8,
-                        icon: const Icon(Icons.keyboard_arrow_down_rounded,
-                            color: AppColors.textHint),
-                        style: const TextStyle(
-                            fontSize: 14,
-                            color: AppColors.textPrimary,
-                            fontWeight: FontWeight.w500),
-                        items: const [
-                          DropdownMenuItem(
-                              value: 'mogok', child: Text('Kendaraan Mogok')),
-                          DropdownMenuItem(
-                              value: 'kecelakaan',
-                              child: Text('Kecelakaan lalu lintas')),
-                          DropdownMenuItem(
-                              value: 'hambatan',
-                              child:
-                                  Text('Hambatan di jalan (Ban Pecah, dll)')),
-                        ],
-                        onChanged: (val) {
-                          if (val != null) setState(() => _jenisKejadian = val);
+                  if (_jenisKejadian == 'lainnya') ...[
+                    CustomTextField(
+                      label: 'Jenis Kejadian',
+                      hint: 'Ketik jenis kejadian...',
+                      controller: _jenisKejadianLainnyaController,
+                      validator: (val) => (val == null || val.isEmpty)
+                          ? 'Jenis kejadian wajib diisi'
+                          : null,
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.close, color: AppColors.textHint),
+                        onPressed: () {
+                          setState(() {
+                            _jenisKejadian = 'mogok';
+                            _jenisKejadianLainnyaController.clear();
+                          });
                         },
                       ),
                     ),
-                  ),
+                  ] else ...[
+                    const Text(
+                      'Jenis Kejadian',
+                      style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textBody),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.border, width: 1),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: _jenisKejadian,
+                          isExpanded: true,
+                          dropdownColor: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          elevation: 8,
+                          icon: const Icon(Icons.keyboard_arrow_down_rounded,
+                              color: AppColors.textHint),
+                          style: const TextStyle(
+                              fontSize: 14,
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.w500),
+                          items: const [
+                            DropdownMenuItem(
+                                value: 'mogok', child: Text('Kendaraan Mogok')),
+                            DropdownMenuItem(
+                                value: 'kecelakaan',
+                                child: Text('Kecelakaan lalu lintas')),
+                            DropdownMenuItem(
+                                value: 'hambatan',
+                                child:
+                                    Text('Hambatan di jalan (Ban Pecah, dll)')),
+                            DropdownMenuItem(
+                                value: 'lainnya', child: Text('Lainnya')),
+                          ],
+                          onChanged: (val) {
+                            if (val != null) setState(() => _jenisKejadian = val);
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+
                   const SizedBox(height: 16),
 
                   CustomTextField(

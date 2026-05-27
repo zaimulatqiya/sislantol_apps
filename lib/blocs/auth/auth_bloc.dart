@@ -2,12 +2,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../../models/user_model.dart';
-import '../../data/mock_data.dart';
+import '../../data/datasources/mock_auth_datasource.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  AuthBloc() : super(AuthInitial()) {
+  final MockAuthDataSource authDataSource;
+
+  AuthBloc({required this.authDataSource}) : super(AuthInitial()) {
     on<LoginSubmitted>(_onLogin);
     on<RegisterSubmitted>(_onRegister);
     on<LogoutRequested>(_onLogout);
@@ -33,20 +35,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _onLogin(LoginSubmitted event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
-    await Future.delayed(const Duration(seconds: 1)); // Simulate network
-
     try {
-      // Find user from mock data
-      final user = MockData.users.firstWhere(
-        (u) => u.email == event.email,
-        orElse: () => throw Exception('Email tidak ditemukan'),
-      );
+      final user = await authDataSource.login(event.email, event.password);
       
-      // Since dummy, we ignore password check or just assume it is 'password123'
-      if (event.password.isEmpty) {
-        throw Exception('Password wajib diisi');
-      }
-
       // Save session
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('user_data', jsonEncode(user.toJson()));
@@ -59,10 +50,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _onRegister(RegisterSubmitted event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
-    await Future.delayed(const Duration(seconds: 1)); // Simulate network
-
     try {
-      // Simulate registering new user logic
       final newUser = UserModel(
         id: 'u${DateTime.now().millisecondsSinceEpoch}',
         nama: event.nama,
@@ -71,14 +59,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         role: 'pengguna',
       );
 
-      // Save to mock memory so it's queryable during the session if needed
-      MockData.users.add(newUser);
+      final registeredUser = await authDataSource.register(newUser);
 
       // Save session
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('user_data', jsonEncode(newUser.toJson()));
+      await prefs.setString('user_data', jsonEncode(registeredUser.toJson()));
 
-      emit(AuthSuccess(user: newUser));
+      emit(AuthSuccess(user: registeredUser));
     } catch (e) {
       emit(AuthFailure(message: e.toString()));
     }
