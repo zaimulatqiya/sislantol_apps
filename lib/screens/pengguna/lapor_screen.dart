@@ -27,6 +27,7 @@ class _LaporScreenState extends State<LaporScreen> {
 
   final ImagePicker _picker = ImagePicker();
   final List<XFile> _selectedImages = [];
+  bool _showPhotoError = false;
 
   void _pickImages(ImageSource source) async {
     try {
@@ -35,6 +36,7 @@ class _LaporScreenState extends State<LaporScreen> {
         if (images.isNotEmpty) {
           setState(() {
             _selectedImages.addAll(images);
+            _showPhotoError = false;
           });
         }
       } else {
@@ -42,6 +44,7 @@ class _LaporScreenState extends State<LaporScreen> {
         if (image != null) {
           setState(() {
             _selectedImages.add(image);
+            _showPhotoError = false;
           });
         }
       }
@@ -97,13 +100,14 @@ class _LaporScreenState extends State<LaporScreen> {
   }
 
   void _submit() async {
-    if (_formKey.currentState!.validate()) {
+    setState(() {
+      _showPhotoError = _selectedImages.isEmpty;
+    });
+
+    if (_formKey.currentState!.validate() && !_showPhotoError) {
       final authState = context.read<AuthBloc>().state;
       if (authState is AuthSuccess) {
-        List<String>? finalFotoPaths;
-        if (_selectedImages.isNotEmpty) {
-          finalFotoPaths = _selectedImages.map((file) => file.path).toList();
-        }
+        List<String> finalFotoPaths = _selectedImages.map((file) => file.path).toList();
 
         if (!mounted) return;
         
@@ -140,27 +144,74 @@ class _LaporScreenState extends State<LaporScreen> {
             showDialog(
               context: context,
               barrierDismissible: false,
-              builder: (context) => AlertDialog(
+              builder: (context) => Dialog(
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
-                icon: const Icon(Icons.check_circle_outline,
-                    color: AppColors.success, size: 48),
-                title: const Text('Laporan Berhasil',
-                    style: TextStyle(fontSize: 16)),
-                content: const Text(
-                  'Laporan Anda telah berhasil dikirim dan sedang menunggu respon dari petugas.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 12),
+                  borderRadius: BorderRadius.circular(24),
                 ),
-                actions: [
-                  CustomButton(
-                    label: 'Kembali ke Beranda',
-                    onPressed: () {
-                      Navigator.of(context).pop(); // Close Dialog
-                      Navigator.of(context).pop(); // Go back to Home
-                    },
-                  )
-                ],
+                elevation: 0,
+                backgroundColor: Colors.transparent,
+                child: Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.rectangle,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withOpacity(0.1),
+                        blurRadius: 24,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: AppColors.success.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.check_circle_rounded,
+                          color: AppColors.success,
+                          size: 48,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      const Text(
+                        'Laporan Berhasil!',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'Laporan Anda telah berhasil dikirim dan sedang menunggu respon dari petugas tol.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: AppColors.textBody,
+                          height: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      SizedBox(
+                        width: double.infinity,
+                        child: CustomButton(
+                          label: 'Kembali ke Beranda',
+                          onPressed: () {
+                            Navigator.of(context).pop(); // Close Dialog
+                            Navigator.of(context).pop(); // Go back to Home
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             );
           } else if (state is LaporanFailure) {
@@ -272,20 +323,18 @@ class _LaporScreenState extends State<LaporScreen> {
                   const SizedBox(height: 16),
 
                   CustomTextField(
-                    label: 'Deskripsi Tambahan',
+                    label: 'Deskripsi Tambahan (Opsional)',
                     hint: 'Jelaskan kondisi dengan detail',
                     controller: _deskripsiController,
                     maxLines: 4,
                     maxLength: 300,
-                    validator: (val) => (val == null || val.isEmpty)
-                        ? 'Deskripsi wajib diisi'
-                        : null,
+                    validator: (val) => null,
                   ),
                   const SizedBox(height: 20),
 
                   // Simulated Photo Picker
                   const Text(
-                    'Foto Bukti (Opsional)',
+                    'Foto Bukti',
                     style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -367,10 +416,14 @@ class _LaporScreenState extends State<LaporScreen> {
                         width: double.infinity,
                         height: 120,
                         decoration: BoxDecoration(
-                          color: AppColors.primaryLight.withOpacity(0.5),
+                          color: _showPhotoError 
+                              ? AppColors.danger.withOpacity(0.05)
+                              : AppColors.primaryLight.withOpacity(0.5),
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                              color: AppColors.primary.withOpacity(0.2),
+                              color: _showPhotoError 
+                                  ? AppColors.danger 
+                                  : AppColors.primary.withOpacity(0.2),
                               width: 1.5,
                               style: BorderStyle.solid),
                         ),
@@ -405,6 +458,20 @@ class _LaporScreenState extends State<LaporScreen> {
                       ),
                     ),
                   ],
+                  if (_showPhotoError)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8, left: 16),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.error_outline, color: AppColors.danger, size: 14),
+                          const SizedBox(width: 4),
+                          const Text(
+                            'Foto bukti wajib dilampirkan',
+                            style: TextStyle(color: AppColors.danger, fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    ),
                   const SizedBox(height: 32),
 
                   BlocBuilder<LaporanBloc, LaporanState>(
