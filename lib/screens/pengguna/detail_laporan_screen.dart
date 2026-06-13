@@ -7,7 +7,7 @@ import '../../core/constants/app_colors.dart';
 import '../../widgets/common/badge_status.dart';
 
 class DetailLaporanScreen extends StatelessWidget {
-  const DetailLaporanScreen({Key? key}) : super(key: key);
+  const DetailLaporanScreen({super.key});
 
   ImageProvider _getImageProvider(String url) {
     if (kIsWeb) return NetworkImage(url);
@@ -104,12 +104,12 @@ class DetailLaporanScreen extends StatelessWidget {
                     _buildInfoRow(
                         'Lokasi', laporan.lokasi, Icons.location_on_outlined),
                     const SizedBox(height: 16),
-                    Row(
+                    const Row(
                       children: [
-                        const Icon(Icons.description_outlined,
+                        Icon(Icons.description_outlined,
                             size: 18, color: AppColors.textMuted),
-                        const SizedBox(width: 8),
-                        const Text('Deskripsi',
+                        SizedBox(width: 8),
+                        Text('Deskripsi',
                             style: TextStyle(
                                 fontSize: 13,
                                 color: AppColors.textMuted,
@@ -126,12 +126,12 @@ class DetailLaporanScreen extends StatelessWidget {
                     ),
                     if (laporan.fotoUrls != null && laporan.fotoUrls!.isNotEmpty) ...[
                       const SizedBox(height: 24),
-                      Row(
+                      const Row(
                         children: [
-                          const Icon(Icons.photo_outlined,
+                          Icon(Icons.photo_outlined,
                               size: 18, color: AppColors.textMuted),
-                          const SizedBox(width: 8),
-                          const Text('Foto Bukti',
+                          SizedBox(width: 8),
+                          Text('Foto Bukti',
                               style: TextStyle(
                                   fontSize: 13,
                                   color: AppColors.textMuted,
@@ -213,12 +213,12 @@ class DetailLaporanScreen extends StatelessWidget {
                     ],
                     if (laporan.catatanPetugas != null) ...[
                       const SizedBox(height: 16),
-                      Row(
+                      const Row(
                         children: [
-                          const Icon(Icons.notes_outlined,
+                          Icon(Icons.notes_outlined,
                               size: 18, color: AppColors.textMuted),
-                          const SizedBox(width: 8),
-                          const Text('Catatan Petugas',
+                          SizedBox(width: 8),
+                          Text('Catatan Petugas',
                               style: TextStyle(
                                   fontSize: 13,
                                   color: AppColors.textMuted,

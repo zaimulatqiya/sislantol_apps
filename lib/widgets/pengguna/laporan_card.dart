@@ -8,10 +8,10 @@ class LaporanCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const LaporanCard({
-    Key? key,
+    super.key,
     required this.laporan,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

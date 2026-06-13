@@ -2,12 +2,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../../models/user_model.dart';
-import '../../data/datasources/mock_auth_datasource.dart';
+import '../../data/datasources/supabase_auth_datasource.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  final MockAuthDataSource authDataSource;
+  final SupabaseAuthDataSource authDataSource;
 
   AuthBloc({required this.authDataSource}) : super(AuthInitial()) {
     on<LoginSubmitted>(_onLogin);
@@ -59,7 +59,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         role: 'pengguna',
       );
 
-      final registeredUser = await authDataSource.register(newUser);
+      final registeredUser = await authDataSource.register(newUser, event.password);
 
       // Save session
       final prefs = await SharedPreferences.getInstance();

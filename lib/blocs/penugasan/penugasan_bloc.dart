@@ -1,11 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../models/penugasan_model.dart';
-import '../../data/datasources/mock_penugasan_datasource.dart';
+import '../../data/datasources/supabase_penugasan_datasource.dart';
 import 'penugasan_event.dart';
 import 'penugasan_state.dart';
 
 class PenugasanBloc extends Bloc<PenugasanEvent, PenugasanState> {
-  final MockPenugasanDataSource penugasanDataSource;
+  final SupabasePenugasanDataSource penugasanDataSource;
 
   PenugasanBloc({required this.penugasanDataSource}) : super(PenugasanInitial()) {
     on<LoadPenugasan>(_onLoad);
@@ -34,47 +33,43 @@ class PenugasanBloc extends Bloc<PenugasanEvent, PenugasanState> {
   Future<void> _onUpdateStatus(UpdateStatusPenugasan event, Emitter<PenugasanState> emit) async {
     emit(PenugasanLoading());
     try {
-      final allPenugasan = await penugasanDataSource.getAllPenugasan();
-      final existing = allPenugasan.firstWhere((p) => p.id == event.penugasanId);
-      
-      final updated = existing.copyWith(status: event.statusBaru);
-      await penugasanDataSource.updatePenugasan(updated);
-      
+      await penugasanDataSource.updateStatusPenugasan(event.penugasanId, event.statusBaru);
       emit(const PenugasanUpdateSuccess('Status berhasil diperbarui'));
       add(LoadPenugasan(petugasId: event.petugasId));
     } catch (e) {
-      emit(PenugasanFailure(message: 'Penugasan tidak ditemukan atau gagal diupdate: $e'));
+      emit(PenugasanFailure(message: 'Penugasan gagal diupdate: $e'));
     }
   }
 
   Future<void> _onSelesaikan(SelesaikanTugas event, Emitter<PenugasanState> emit) async {
     emit(PenugasanLoading());
     try {
-      final allPenugasan = await penugasanDataSource.getAllPenugasan();
-      final existing = allPenugasan.firstWhere((p) => p.id == event.penugasanId);
+      // Kita perlu mencari penugasan terkait dari state saat ini atau nge-fetch karena kita butuh laporanId
+      // Lebih mudah fetch saja atau menganggap laporanId dikirim di event (karena belum, kita ambil dari list)
+      final tugasList = await penugasanDataSource.getPenugasanByPetugas(event.petugasId);
+      final existing = tugasList.firstWhere((p) => p.id == event.penugasanId);
 
-      final updated = existing.copyWith(
-        status: 'selesai',
-        fotoBuktiUrl: event.fotoPath,
-        catatanPenutup: event.catatanPenutup,
+      if (event.fotoPath == null) {
+        throw Exception("Foto bukti wajib dilampirkan");
+      }
+
+      await penugasanDataSource.selesaikanTugas(
+        penugasanId: existing.id,
+        laporanId: existing.laporanId,
+        fotoPath: event.fotoPath!,
+        catatanPenutup: event.catatanPenutup ?? '',
       );
-
-      await penugasanDataSource.updatePenugasan(updated);
 
       emit(const PenugasanUpdateSuccess('Tugas berhasil diselesaikan'));
       add(LoadPenugasan(petugasId: event.petugasId));
     } catch (e) {
-      emit(PenugasanFailure(message: 'Penugasan tidak ditemukan atau gagal diselesaikan: $e'));
+      emit(PenugasanFailure(message: 'Penugasan gagal diselesaikan: $e'));
     }
   }
 
   Future<void> _onDeletePenugasan(DeletePenugasan event, Emitter<PenugasanState> emit) async {
-    emit(PenugasanLoading());
-    try {
-      await penugasanDataSource.removePenugasan(event.penugasanId);
-      add(LoadPenugasan(petugasId: event.petugasId));
-    } catch (e) {
-      emit(PenugasanFailure(message: 'Gagal menghapus tugas: $e'));
-    }
+    // Fungsi hapus penugasan biasanya tidak dilakukan oleh petugas (melainkan admin)
+    // Untuk saat ini kita abaikan atau kembalikan error.
+    emit(const PenugasanFailure(message: 'Hanya admin yang dapat menghapus tugas.'));
   }
 }

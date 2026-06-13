@@ -11,7 +11,7 @@ import '../../widgets/common/empty_state.dart';
 import '../../widgets/pengguna/laporan_card.dart';
 
 class RiwayatScreen extends StatefulWidget {
-  const RiwayatScreen({Key? key}) : super(key: key);
+  const RiwayatScreen({super.key});
 
   @override
   State<RiwayatScreen> createState() => _RiwayatScreenState();

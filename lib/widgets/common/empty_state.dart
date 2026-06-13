@@ -6,10 +6,10 @@ class EmptyState extends StatelessWidget {
   final String message;
 
   const EmptyState({
-    Key? key,
+    super.key,
     required this.icon,
     required this.message,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -11,7 +11,7 @@ import '../../widgets/common/empty_state.dart';
 import '../../widgets/petugas/tugas_card.dart';
 
 class RiwayatTugasScreen extends StatefulWidget {
-  const RiwayatTugasScreen({Key? key}) : super(key: key);
+  const RiwayatTugasScreen({super.key});
 
   @override
   State<RiwayatTugasScreen> createState() => _RiwayatTugasScreenState();

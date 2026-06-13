@@ -11,10 +11,10 @@ class TugasCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const TugasCard({
-    Key? key,
+    super.key,
     required this.tugas,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

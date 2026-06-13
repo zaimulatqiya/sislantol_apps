@@ -1,6 +1,4 @@
 import 'dart:io';
-import 'dart:convert';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,7 +14,7 @@ import '../../widgets/common/custom_button.dart';
 import '../../widgets/common/custom_text_field.dart';
 
 class DetailTugasScreen extends StatefulWidget {
-  const DetailTugasScreen({Key? key}) : super(key: key);
+  const DetailTugasScreen({super.key});
 
   @override
   State<DetailTugasScreen> createState() => _DetailTugasScreenState();
@@ -138,9 +136,7 @@ class _DetailTugasScreenState extends State<DetailTugasScreen> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(16),
                             image: DecorationImage(
-                              image: kIsWeb 
-                                  ? NetworkImage(pickedImage!.path)
-                                  : FileImage(File(pickedImage!.path)) as ImageProvider,
+                              image: FileImage(File(pickedImage!.path)) as ImageProvider,
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -195,19 +191,10 @@ class _DetailTugasScreenState extends State<DetailTugasScreen> {
                           return;
                         }
                         
-                        String finalFotoPath;
-                        if (kIsWeb) {
-                          final bytes = await pickedImage!.readAsBytes();
-                          final base64String = base64Encode(bytes);
-                          finalFotoPath = 'data:image/jpeg;base64,$base64String';
-                        } else {
-                          finalFotoPath = pickedImage!.path;
-                        }
-
                         context.read<PenugasanBloc>().add(
                               SelesaikanTugas(
                                 penugasanId: tugas.id,
-                                fotoPath: finalFotoPath,
+                                fotoPath: pickedImage!.path,
                                 catatanPenutup: _catatanPenutupController.text,
                                 petugasId: petugasId,
                               ),
@@ -296,11 +283,11 @@ class _DetailTugasScreenState extends State<DetailTugasScreen> {
                       const SizedBox(height: 16),
                       _buildInfoRow('Lokasi', _tugas.lokasi, Icons.location_on_outlined),
                       const SizedBox(height: 16),
-                      Row(
+                      const Row(
                         children: [
-                          const Icon(Icons.description_outlined, size: 18, color: AppColors.textMuted),
-                          const SizedBox(width: 8),
-                          const Text('Deskripsi Pengguna', style: TextStyle(fontSize: 13, color: AppColors.textMuted, fontWeight: FontWeight.w500)),
+                          Icon(Icons.description_outlined, size: 18, color: AppColors.textMuted),
+                          SizedBox(width: 8),
+                          Text('Deskripsi Pengguna', style: TextStyle(fontSize: 13, color: AppColors.textMuted, fontWeight: FontWeight.w500)),
                         ],
                       ),
                       const SizedBox(height: 8),
@@ -308,6 +295,40 @@ class _DetailTugasScreenState extends State<DetailTugasScreen> {
                         _tugas.deskripsi,
                         style: const TextStyle(fontSize: 14, color: AppColors.textPrimary, height: 1.5),
                       ),
+                      
+                      if (_tugas.fotoKejadianUrls != null && _tugas.fotoKejadianUrls!.isNotEmpty) ...[
+                        const SizedBox(height: 16),
+                        const Row(
+                          children: [
+                            Icon(Icons.image_outlined, size: 18, color: AppColors.textMuted),
+                            SizedBox(width: 8),
+                            Text('Foto Kejadian', style: TextStyle(fontSize: 13, color: AppColors.textMuted, fontWeight: FontWeight.w500)),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          height: 120,
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: _tugas.fotoKejadianUrls!.length,
+                            itemBuilder: (context, index) {
+                              return Container(
+                                width: 160,
+                                margin: const EdgeInsets.only(right: 12),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: AppColors.border),
+                                  image: DecorationImage(
+                                    image: NetworkImage(_tugas.fotoKejadianUrls![index]),
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                      
                       const SizedBox(height: 20),
                       Container(
                         padding: const EdgeInsets.all(16),
@@ -319,8 +340,8 @@ class _DetailTugasScreenState extends State<DetailTugasScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                              children: const [
+                            const Row(
+                              children: [
                                 Icon(Icons.info_outline, size: 16, color: AppColors.badgeAssignText),
                                 SizedBox(width: 6),
                                 Text('Catatan Admin', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.badgeAssignText)),
@@ -357,7 +378,9 @@ class _DetailTugasScreenState extends State<DetailTugasScreen> {
   }
 
   Widget _buildDynamicActionButton(BuildContext context, PenugasanModel tugas, String petugasId) {
-    if (tugas.status == 'selesai') {
+    final currentStatus = tugas.status.trim().toLowerCase();
+
+    if (currentStatus == 'selesai') {
       return Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 14),
@@ -378,7 +401,8 @@ class _DetailTugasScreenState extends State<DetailTugasScreen> {
     String nextStatus = '';
     Color btnColor = AppColors.primary;
     
-    switch (tugas.status.toLowerCase()) {
+    switch (currentStatus) {
+      case 'aktif':
       case 'ditugaskan':
         label = 'KONFIRMASI TERIMA TUGAS';
         nextStatus = 'diterima';
@@ -403,6 +427,24 @@ class _DetailTugasScreenState extends State<DetailTugasScreen> {
         nextStatus = 'selesai';
         btnColor = AppColors.success;
         break;
+    }
+
+    if (nextStatus.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        decoration: BoxDecoration(
+          color: Colors.red.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.red.withOpacity(0.5)),
+        ),
+        child: Center(
+          child: Text(
+            'STATUS TIDAK DIKENALI: "$currentStatus"',
+            style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+          ),
+        ),
+      );
     }
 
     return CustomButton(

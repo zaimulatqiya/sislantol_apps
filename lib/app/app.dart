@@ -7,9 +7,9 @@ import '../blocs/auth/auth_bloc.dart';
 import '../blocs/laporan/laporan_bloc.dart';
 import '../blocs/penugasan/penugasan_bloc.dart';
 import '../features/splash/presentation/bloc/splash_cubit.dart';
-import '../data/datasources/mock_auth_datasource.dart';
-import '../data/datasources/mock_laporan_datasource.dart';
-import '../data/datasources/mock_penugasan_datasource.dart';
+import '../data/datasources/supabase_auth_datasource.dart';
+import '../data/datasources/supabase_laporan_datasource.dart';
+import '../data/datasources/supabase_penugasan_datasource.dart';
 
 import '../features/splash/presentation/screens/splash_screen.dart';
 import '../screens/auth/login_screen.dart';
@@ -27,15 +27,15 @@ import '../screens/petugas/riwayat_tugas_screen.dart';
 import '../screens/shared/profil_screen.dart';
 
 class SislantolApp extends StatelessWidget {
-  const SislantolApp({Key? key}) : super(key: key);
+  const SislantolApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<AuthBloc>(create: (_) => AuthBloc(authDataSource: MockAuthDataSource())),
-        BlocProvider<LaporanBloc>(create: (_) => LaporanBloc(laporanDataSource: MockLaporanDataSource())),
-        BlocProvider<PenugasanBloc>(create: (_) => PenugasanBloc(penugasanDataSource: MockPenugasanDataSource())),
+        BlocProvider<AuthBloc>(create: (_) => AuthBloc(authDataSource: SupabaseAuthDataSource())),
+        BlocProvider<LaporanBloc>(create: (_) => LaporanBloc(laporanDataSource: SupabaseLaporanDataSource())),
+        BlocProvider<PenugasanBloc>(create: (_) => PenugasanBloc(penugasanDataSource: SupabasePenugasanDataSource())),
         BlocProvider<SplashCubit>(create: (_) => SplashCubit()),
       ],
       child: MaterialApp(

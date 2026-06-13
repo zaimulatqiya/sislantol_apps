@@ -8,7 +8,7 @@ import '../../blocs/auth/auth_state.dart';
 import '../../widgets/common/custom_button.dart';
 
 class ProfilScreen extends StatelessWidget {
-  const ProfilScreen({Key? key}) : super(key: key);
+  const ProfilScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

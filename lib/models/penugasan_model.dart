@@ -10,6 +10,7 @@ class PenugasanModel {
   final DateTime createdAt;
   final String? fotoBuktiUrl;
   final String? catatanPenutup;
+  final List<String>? fotoKejadianUrls;
 
   PenugasanModel({
     required this.id,
@@ -23,6 +24,7 @@ class PenugasanModel {
     required this.createdAt,
     this.fotoBuktiUrl,
     this.catatanPenutup,
+    this.fotoKejadianUrls,
   });
 
   factory PenugasanModel.fromJson(Map<String, dynamic> json) {
@@ -38,6 +40,7 @@ class PenugasanModel {
       createdAt: DateTime.parse(json['createdAt']),
       fotoBuktiUrl: json['fotoBuktiUrl'],
       catatanPenutup: json['catatanPenutup'],
+      fotoKejadianUrls: json['fotoKejadianUrls'] != null ? List<String>.from(json['fotoKejadianUrls']) : null,
     );
   }
 
@@ -54,6 +57,7 @@ class PenugasanModel {
       'createdAt': createdAt.toIso8601String(),
       'fotoBuktiUrl': fotoBuktiUrl,
       'catatanPenutup': catatanPenutup,
+      'fotoKejadianUrls': fotoKejadianUrls,
     };
   }
 
@@ -69,6 +73,7 @@ class PenugasanModel {
     DateTime? createdAt,
     String? fotoBuktiUrl,
     String? catatanPenutup,
+    List<String>? fotoKejadianUrls,
   }) {
     return PenugasanModel(
       id: id ?? this.id,
@@ -82,6 +87,7 @@ class PenugasanModel {
       createdAt: createdAt ?? this.createdAt,
       fotoBuktiUrl: fotoBuktiUrl ?? this.fotoBuktiUrl,
       catatanPenutup: catatanPenutup ?? this.catatanPenutup,
+      fotoKejadianUrls: fotoKejadianUrls ?? this.fotoKejadianUrls,
     );
   }
 }

@@ -8,7 +8,7 @@ import '../bloc/splash_cubit.dart';
 import '../bloc/splash_state.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({Key? key}) : super(key: key);
+  const SplashScreen({super.key});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();

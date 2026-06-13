@@ -4,7 +4,7 @@ import '../../../core/constants/app_colors.dart';
 class BadgeStatus extends StatelessWidget {
   final String status;
 
-  const BadgeStatus({Key? key, required this.status}) : super(key: key);
+  const BadgeStatus({super.key, required this.status});
 
   @override
   Widget build(BuildContext context) {

@@ -1,9 +1,7 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import '../../core/constants/app_colors.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_state.dart';
@@ -14,7 +12,7 @@ import '../../widgets/common/custom_button.dart';
 import '../../widgets/common/custom_text_field.dart';
 
 class LaporScreen extends StatefulWidget {
-  const LaporScreen({Key? key}) : super(key: key);
+  const LaporScreen({super.key});
 
   @override
   State<LaporScreen> createState() => _LaporScreenState();
@@ -28,7 +26,7 @@ class _LaporScreenState extends State<LaporScreen> {
   final _formKey = GlobalKey<FormState>();
 
   final ImagePicker _picker = ImagePicker();
-  List<XFile> _selectedImages = [];
+  final List<XFile> _selectedImages = [];
 
   void _pickImages(ImageSource source) async {
     try {
@@ -104,16 +102,7 @@ class _LaporScreenState extends State<LaporScreen> {
       if (authState is AuthSuccess) {
         List<String>? finalFotoPaths;
         if (_selectedImages.isNotEmpty) {
-          finalFotoPaths = [];
-          for (var file in _selectedImages) {
-            if (kIsWeb) {
-              final bytes = await file.readAsBytes();
-              final base64String = base64Encode(bytes);
-              finalFotoPaths.add('data:image/jpeg;base64,$base64String');
-            } else {
-              finalFotoPaths.add(file.path);
-            }
-          }
+          finalFotoPaths = _selectedImages.map((file) => file.path).toList();
         }
 
         if (!mounted) return;
@@ -343,12 +332,7 @@ class _LaporScreenState extends State<LaporScreen> {
                                   border: Border.all(
                                       color: AppColors.border, width: 0.5),
                                   image: DecorationImage(
-                                    image: kIsWeb
-                                        ? NetworkImage(
-                                            _selectedImages[index].path)
-                                        : FileImage(File(
-                                                _selectedImages[index].path))
-                                            as ImageProvider,
+                                    image: FileImage(File(_selectedImages[index].path)) as ImageProvider,
                                     fit: BoxFit.cover,
                                   ),
                                 ),

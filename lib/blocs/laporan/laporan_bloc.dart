@@ -1,12 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../models/laporan_model.dart';
-import '../../data/datasources/mock_laporan_datasource.dart';
+import '../../data/datasources/supabase_laporan_datasource.dart';
 import 'laporan_event.dart';
 import 'laporan_state.dart';
 
 class LaporanBloc extends Bloc<LaporanEvent, LaporanState> {
-  final MockLaporanDataSource laporanDataSource;
+  final SupabaseLaporanDataSource laporanDataSource;
 
   LaporanBloc({required this.laporanDataSource}) : super(LaporanInitial()) {
     on<LoadLaporan>(_onLoadLaporan);
@@ -23,7 +23,7 @@ class LaporanBloc extends Bloc<LaporanEvent, LaporanState> {
       laporanUser.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       emit(LaporanLoaded(laporan: laporanUser));
     } catch (e) {
-      emit(LaporanFailure(message: 'Gagal memuat laporan.'));
+      emit(const LaporanFailure(message: 'Gagal memuat laporan.'));
     }
   }
 
@@ -34,7 +34,7 @@ class LaporanBloc extends Bloc<LaporanEvent, LaporanState> {
       semuaLaporan.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       emit(LaporanLoaded(laporan: semuaLaporan));
     } catch (e) {
-      emit(LaporanFailure(message: 'Gagal memuat semua laporan.'));
+      emit(const LaporanFailure(message: 'Gagal memuat semua laporan.'));
     }
   }
 
