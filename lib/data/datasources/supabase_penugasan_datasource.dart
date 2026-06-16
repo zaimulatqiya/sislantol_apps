@@ -11,6 +11,7 @@ class SupabasePenugasanDataSource {
         .from('penugasan')
         .select('*, laporan(*)')
         .eq('petugas_id', petugasId)
+        .eq('is_deleted_by_petugas', false)
         .order('created_at', ascending: false);
 
     return response.map((data) {
@@ -88,8 +89,13 @@ class SupabasePenugasanDataSource {
     }).eq('id', laporanId);
   }
 
+  Future<void> deletePenugasan(String penugasanId) async {
+    // Delete single assignment
+    await supabase.rpc('soft_delete_penugasan', params: {'p_penugasan_id': int.parse(penugasanId)});
+  }
+
   Future<void> deleteAllPenugasanByPetugas(String petugasId) async {
     // Delete all assignments related to this petugas
-    await supabase.from('penugasan').delete().eq('petugas_id', petugasId);
+    await supabase.rpc('soft_delete_all_penugasan');
   }
 }

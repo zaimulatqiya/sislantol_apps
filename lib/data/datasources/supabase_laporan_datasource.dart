@@ -31,6 +31,7 @@ class SupabaseLaporanDataSource {
           .from('laporan')
           .select()
           .eq('user_id', userId)
+          .eq('is_deleted_by_user', false)
           .order('created_at', ascending: false);
       
       return (response as List).map((data) => _mapToModel(data)).toList();
@@ -110,7 +111,7 @@ class SupabaseLaporanDataSource {
 
   Future<void> deleteLaporan(String id) async {
     try {
-      await _supabase.from('laporan').delete().eq('id', int.parse(id));
+      await _supabase.rpc('soft_delete_laporan', params: {'laporan_id': int.parse(id)});
     } catch (e) {
       throw Exception('Gagal menghapus laporan: $e');
     }
@@ -118,7 +119,7 @@ class SupabaseLaporanDataSource {
 
   Future<void> deleteAllLaporanByUser(String userId) async {
     try {
-      await _supabase.from('laporan').delete().eq('user_id', userId);
+      await _supabase.rpc('soft_delete_all_laporan');
     } catch (e) {
       throw Exception('Gagal menghapus semua laporan: $e');
     }

@@ -69,9 +69,13 @@ class PenugasanBloc extends Bloc<PenugasanEvent, PenugasanState> {
   }
 
   Future<void> _onDeletePenugasan(DeletePenugasan event, Emitter<PenugasanState> emit) async {
-    // Fungsi hapus penugasan biasanya tidak dilakukan oleh petugas (melainkan admin)
-    // Untuk saat ini kita abaikan atau kembalikan error.
-    emit(const PenugasanFailure(message: 'Hanya admin yang dapat menghapus tugas.'));
+    emit(PenugasanLoading());
+    try {
+      await penugasanDataSource.deletePenugasan(event.penugasanId);
+      add(LoadPenugasan(petugasId: event.petugasId));
+    } catch (e) {
+      emit(PenugasanFailure(message: 'Gagal menghapus riwayat penugasan: $e'));
+    }
   }
 
   Future<void> _onDeleteSemuaPenugasanPetugas(DeleteSemuaPenugasanPetugas event, Emitter<PenugasanState> emit) async {
