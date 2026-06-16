@@ -98,7 +98,7 @@ class DetailLaporanScreen extends StatelessWidget {
                     const Divider(height: 32, color: AppColors.border),
                     _buildInfoRow(
                         'Jenis Kejadian',
-                        laporan.jenisKejadian.toUpperCase(),
+                        laporan.displayJenisKejadian.toUpperCase(),
                         Icons.warning_amber_rounded),
                     const SizedBox(height: 16),
                     _buildInfoRow(
@@ -118,10 +118,11 @@ class DetailLaporanScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      laporan.deskripsi,
-                      style: const TextStyle(
+                      laporan.displayDeskripsi.isEmpty ? 'Tidak ada deskripsi tambahan.' : laporan.displayDeskripsi,
+                      style: TextStyle(
                           fontSize: 14,
-                          color: AppColors.textPrimary,
+                          color: laporan.displayDeskripsi.isEmpty ? AppColors.textHint : AppColors.textPrimary,
+                          fontStyle: laporan.displayDeskripsi.isEmpty ? FontStyle.italic : FontStyle.normal,
                           height: 1.5),
                     ),
                     if (laporan.fotoUrls != null && laporan.fotoUrls!.isNotEmpty) ...[

@@ -22,6 +22,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
+  String? _localErrorMessage;
 
   @override
   void dispose() {
@@ -54,12 +55,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               (route) => false,
             );
           } else if (state is AuthFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: AppColors.danger,
-              ),
-            );
+            // Error ditangani di UI builder (inline)
           }
         },
         builder: (context, state) {
@@ -104,6 +100,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   child: Column(
                     children: [
+                      if (state is AuthFailure || _localErrorMessage != null)
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          margin: const EdgeInsets.only(bottom: 24),
+                          decoration: BoxDecoration(
+                            color: AppColors.danger.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: AppColors.danger.withOpacity(0.5)),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.error_outline, color: AppColors.danger, size: 20),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  _localErrorMessage ?? (state as AuthFailure).message,
+                                  style: const TextStyle(
+                                    color: AppColors.danger,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       CustomTextField(
                         label: 'Nama Lengkap',
                         hint: 'Nama sesuai KTP/SIM',
@@ -156,13 +178,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           label: 'Daftar Sekarang',
                           isLoading: state is AuthLoading,
                           onPressed: () {
+                            setState(() {
+                              _localErrorMessage = null;
+                            });
                             if (_passwordController.text != _confirmPasswordController.text) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Password tidak cocok'),
-                                  backgroundColor: AppColors.danger,
-                                ),
-                              );
+                              setState(() {
+                                _localErrorMessage = 'Password tidak cocok';
+                              });
                               return;
                             }
                             context.read<AuthBloc>().add(

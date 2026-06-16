@@ -36,7 +36,17 @@ class SupabaseAuthDataSource {
       );
     } catch (e) {
       if (e is AuthException) {
-        throw Exception(e.message);
+        String message = e.message;
+        if (message.toLowerCase().contains('invalid login credentials')) {
+          message = 'Email atau password salah';
+        } else if (message.toLowerCase().contains('email not confirmed')) {
+          message = 'Email belum diverifikasi';
+        } else if (message.toLowerCase().contains('user not found')) {
+          message = 'Email belum terdaftar';
+        } else if (message.toLowerCase().contains('invalid email')) {
+          message = 'Format email tidak valid';
+        }
+        throw Exception(message);
       }
       throw Exception('Gagal melakukan login: $e');
     }
@@ -73,7 +83,15 @@ class SupabaseAuthDataSource {
       );
     } catch (e) {
       if (e is AuthException) {
-        throw Exception(e.message);
+        String message = e.message;
+        if (message.toLowerCase().contains('user already registered')) {
+          message = 'Email sudah terdaftar';
+        } else if (message.toLowerCase().contains('invalid email')) {
+          message = 'Format email tidak valid';
+        } else if (message.toLowerCase().contains('password should be')) {
+          message = 'Password terlalu lemah, minimal 6 karakter';
+        }
+        throw Exception(message);
       }
       throw Exception('Gagal melakukan registrasi: $e');
     }

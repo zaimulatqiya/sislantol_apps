@@ -13,6 +13,30 @@ class LaporanModel {
   final String? catatanPetugas;
   final DateTime? selesaiAt;
 
+  String get displayJenisKejadian {
+    if (jenisKejadian.toLowerCase() == 'lainnya' && deskripsi.startsWith('Jenis Kejadian: ')) {
+      int newlineIndex = deskripsi.indexOf('\n');
+      if (newlineIndex != -1) {
+        return deskripsi.substring('Jenis Kejadian: '.length, newlineIndex).trim();
+      } else {
+        return deskripsi.substring('Jenis Kejadian: '.length).trim();
+      }
+    }
+    return jenisKejadian;
+  }
+
+  String get displayDeskripsi {
+    if (jenisKejadian.toLowerCase() == 'lainnya' && deskripsi.startsWith('Jenis Kejadian: ')) {
+      int newlineIndex = deskripsi.indexOf('\n');
+      if (newlineIndex != -1) {
+        return deskripsi.substring(newlineIndex + 1).trim();
+      } else {
+        return '';
+      }
+    }
+    return deskripsi;
+  }
+
   LaporanModel({
     required this.id,
     required this.userId,

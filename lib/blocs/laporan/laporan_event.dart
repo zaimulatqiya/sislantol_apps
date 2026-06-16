@@ -58,3 +58,12 @@ class DeleteLaporan extends LaporanEvent {
   @override
   List<Object?> get props => [id, userId];
 }
+
+class DeleteSemuaLaporanUser extends LaporanEvent {
+  final String userId;
+
+  const DeleteSemuaLaporanUser({required this.userId});
+
+  @override
+  List<Object?> get props => [userId];
+}

@@ -12,6 +12,30 @@ class PenugasanModel {
   final String? catatanPenutup;
   final List<String>? fotoKejadianUrls;
 
+  String get displayJenisKejadian {
+    if (jenisKejadian.toLowerCase() == 'lainnya' && deskripsi.startsWith('Jenis Kejadian: ')) {
+      int newlineIndex = deskripsi.indexOf('\n');
+      if (newlineIndex != -1) {
+        return deskripsi.substring('Jenis Kejadian: '.length, newlineIndex).trim();
+      } else {
+        return deskripsi.substring('Jenis Kejadian: '.length).trim();
+      }
+    }
+    return jenisKejadian;
+  }
+
+  String get displayDeskripsi {
+    if (jenisKejadian.toLowerCase() == 'lainnya' && deskripsi.startsWith('Jenis Kejadian: ')) {
+      int newlineIndex = deskripsi.indexOf('\n');
+      if (newlineIndex != -1) {
+        return deskripsi.substring(newlineIndex + 1).trim();
+      } else {
+        return '';
+      }
+    }
+    return deskripsi;
+  }
+
   PenugasanModel({
     required this.id,
     required this.laporanId,

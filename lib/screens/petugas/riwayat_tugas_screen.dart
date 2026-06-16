@@ -9,6 +9,7 @@ import '../../blocs/penugasan/penugasan_event.dart';
 import '../../blocs/penugasan/penugasan_state.dart';
 import '../../widgets/common/empty_state.dart';
 import '../../widgets/petugas/tugas_card.dart';
+import '../../widgets/common/custom_button.dart';
 
 class RiwayatTugasScreen extends StatefulWidget {
   const RiwayatTugasScreen({super.key});
@@ -27,15 +28,127 @@ class _RiwayatTugasScreenState extends State<RiwayatTugasScreen> {
     }
   }
 
+  void _confirmDeleteAll(BuildContext context) async {
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.rectangle,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.danger.withOpacity(0.15),
+                  blurRadius: 24,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.danger.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.delete_sweep_rounded,
+                    color: AppColors.danger,
+                    size: 48,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                const Text(
+                  'Hapus Semua Riwayat?',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Apakah Anda yakin ingin menghapus semua riwayat penugasan Anda? Tindakan ini tidak dapat dibatalkan.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textBody,
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () => Navigator.of(context).pop(false),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: const Text("Batal", style: TextStyle(color: AppColors.textHint, fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: CustomButton(
+                        label: 'Hapus Semua',
+                        color: AppColors.danger,
+                        onPressed: () => Navigator.of(context).pop(true),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (confirm == true) {
+      final authState = context.read<AuthBloc>().state;
+      if (authState is AuthSuccess) {
+        context.read<PenugasanBloc>().add(DeleteSemuaPenugasanPetugas(petugasId: authState.user.id));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Semua riwayat tugas berhasil dihapus"),
+            backgroundColor: AppColors.success,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Riwayat Penugasan', style: TextStyle(fontWeight: FontWeight.w600)),
-      ),
-      body: BlocBuilder<PenugasanBloc, PenugasanState>(
-        builder: (context, state) {
+    return BlocBuilder<PenugasanBloc, PenugasanState>(
+      builder: (context, state) {
+        final bool hasData = state is PenugasanLoaded && state.selesai.isNotEmpty;
+        
+        return Scaffold(
+          backgroundColor: AppColors.background,
+          appBar: AppBar(
+            title: const Text('Riwayat Penugasan', style: TextStyle(fontWeight: FontWeight.w600)),
+            actions: [
+              if (hasData)
+                IconButton(
+                  icon: const Icon(Icons.delete_sweep_rounded),
+                  onPressed: () => _confirmDeleteAll(context),
+                  tooltip: 'Hapus Semua',
+                ),
+            ],
+          ),
+          body: () {
           if (state is PenugasanLoading) {
             return const Center(child: CircularProgressIndicator());
           } else if (state is PenugasanLoaded) {
@@ -68,20 +181,84 @@ class _RiwayatTugasScreenState extends State<RiwayatTugasScreen> {
                     return await showDialog(
                       context: context,
                       builder: (BuildContext context) {
-                        return AlertDialog(
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          title: const Text("Konfirmasi Hapus", style: TextStyle(fontSize: 16)),
-                          content: const Text("Apakah Anda yakin ingin menghapus riwayat tugas ini?"),
-                          actions: <Widget>[
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(false),
-                              child: const Text("Batal", style: TextStyle(color: AppColors.textMuted)),
+                        return Dialog(
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                          elevation: 0,
+                          backgroundColor: Colors.transparent,
+                          child: Container(
+                            padding: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.rectangle,
+                              borderRadius: BorderRadius.circular(24),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.danger.withOpacity(0.15),
+                                  blurRadius: 24,
+                                  offset: const Offset(0, 8),
+                                ),
+                              ],
                             ),
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(true),
-                              child: const Text("Hapus", style: TextStyle(color: AppColors.danger)),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.danger.withOpacity(0.1),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.delete_outline_rounded,
+                                    color: AppColors.danger,
+                                    size: 48,
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+                                const Text(
+                                  'Hapus Tugas Ini?',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                const Text(
+                                  'Apakah Anda yakin ingin menghapus riwayat tugas ini secara permanen?',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: AppColors.textBody,
+                                    height: 1.5,
+                                  ),
+                                ),
+                                const SizedBox(height: 32),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: TextButton(
+                                        onPressed: () => Navigator.of(context).pop(false),
+                                        style: TextButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(vertical: 14),
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                        ),
+                                        child: const Text("Batal", style: TextStyle(color: AppColors.textHint, fontWeight: FontWeight.bold)),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: CustomButton(
+                                        label: 'Hapus',
+                                        color: AppColors.danger,
+                                        onPressed: () => Navigator.of(context).pop(true),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
                         );
                       },
                     );
@@ -119,8 +296,9 @@ class _RiwayatTugasScreenState extends State<RiwayatTugasScreen> {
             );
           }
           return const SizedBox();
-        },
-      ),
+        }(),
+      );
+      },
     );
   }
 }

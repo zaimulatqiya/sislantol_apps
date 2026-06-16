@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../models/laporan_model.dart';
 import '../../data/datasources/supabase_laporan_datasource.dart';
@@ -13,6 +12,7 @@ class LaporanBloc extends Bloc<LaporanEvent, LaporanState> {
     on<LoadSemuaLaporan>(_onLoadSemuaLaporan);
     on<SubmitLaporan>(_onSubmitLaporan);
     on<DeleteLaporan>(_onDeleteLaporan);
+    on<DeleteSemuaLaporanUser>(_onDeleteSemuaLaporanUser);
   }
 
   Future<void> _onLoadLaporan(LoadLaporan event, Emitter<LaporanState> emit) async {
@@ -71,6 +71,16 @@ class LaporanBloc extends Bloc<LaporanEvent, LaporanState> {
       add(LoadLaporan(userId: event.userId));
     } catch (e) {
       emit(LaporanFailure(message: 'Gagal menghapus laporan: $e'));
+    }
+  }
+
+  Future<void> _onDeleteSemuaLaporanUser(DeleteSemuaLaporanUser event, Emitter<LaporanState> emit) async {
+    emit(LaporanLoading());
+    try {
+      await laporanDataSource.deleteAllLaporanByUser(event.userId);
+      add(LoadLaporan(userId: event.userId));
+    } catch (e) {
+      emit(LaporanFailure(message: 'Gagal menghapus semua riwayat laporan: $e'));
     }
   }
 }

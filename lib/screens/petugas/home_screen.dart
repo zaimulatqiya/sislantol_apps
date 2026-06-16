@@ -9,6 +9,8 @@ import '../../blocs/penugasan/penugasan_event.dart';
 import '../../blocs/penugasan/penugasan_state.dart';
 import '../../widgets/common/empty_state.dart';
 import '../../widgets/petugas/tugas_card.dart';
+import 'riwayat_tugas_screen.dart';
+import '../shared/profil_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,8 +20,67 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final int _currentIndex = 0;
+  int _currentIndex = 0;
 
+  final List<Widget> _pages = [
+    const _DasborPetugas(),
+    const RiwayatTugasScreen(),
+    const ProfilScreen(),
+  ];
+
+  void _onBottomNavTapped(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: _pages[_currentIndex],
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 20,
+              offset: const Offset(0, -5),
+            )
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          child: BottomNavigationBar(
+            currentIndex: _currentIndex,
+            onTap: _onBottomNavTapped,
+            backgroundColor: Colors.white,
+            selectedItemColor: AppColors.primary,
+            unselectedItemColor: AppColors.textHint,
+            selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+            unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
+            elevation: 0,
+            type: BottomNavigationBarType.fixed,
+            items: const [
+              BottomNavigationBarItem(icon: Padding(padding: EdgeInsets.only(bottom: 4), child: Icon(Icons.dashboard_rounded)), label: 'Dasbor'),
+              BottomNavigationBarItem(icon: Padding(padding: EdgeInsets.only(bottom: 4), child: Icon(Icons.assignment_turned_in)), label: 'Riwayat Tugas'),
+              BottomNavigationBarItem(icon: Padding(padding: EdgeInsets.only(bottom: 4), child: Icon(Icons.person_outline)), label: 'Profil'),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DasborPetugas extends StatefulWidget {
+  const _DasborPetugas();
+
+  @override
+  State<_DasborPetugas> createState() => _DasborPetugasState();
+}
+
+class _DasborPetugasState extends State<_DasborPetugas> {
   @override
   void initState() {
     super.initState();
@@ -29,20 +90,9 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _onBottomNavTapped(int index) {
-    if (index == 0) return;
-    if (index == 1) {
-      Navigator.pushNamed(context, AppRoutes.petugasRiwayat);
-    } else if (index == 2) {
-      Navigator.pushNamed(context, AppRoutes.profil);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: BlocBuilder<AuthBloc, AuthState>(
+    return BlocBuilder<AuthBloc, AuthState>(
         builder: (context, authState) {
           if (authState is AuthSuccess) {
             final user = authState.user;
@@ -181,37 +231,6 @@ class _HomeScreenState extends State<HomeScreen> {
           }
           return const Center(child: CircularProgressIndicator());
         },
-      ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 20,
-              offset: const Offset(0, -5),
-            )
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          child: BottomNavigationBar(
-            currentIndex: _currentIndex,
-            onTap: _onBottomNavTapped,
-            backgroundColor: Colors.white,
-            selectedItemColor: AppColors.primary,
-            unselectedItemColor: AppColors.textHint,
-            selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
-            unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
-            elevation: 0,
-            type: BottomNavigationBarType.fixed,
-            items: const [
-              BottomNavigationBarItem(icon: Padding(padding: EdgeInsets.only(bottom: 4), child: Icon(Icons.dashboard_rounded)), label: 'Dasbor'),
-              BottomNavigationBarItem(icon: Padding(padding: EdgeInsets.only(bottom: 4), child: Icon(Icons.assignment_turned_in)), label: 'Riwayat Tugas'),
-              BottomNavigationBarItem(icon: Padding(padding: EdgeInsets.only(bottom: 4), child: Icon(Icons.person_outline)), label: 'Profil'),
-            ],
-          ),
-        ),
-      ),
-    );
+      );
   }
 }

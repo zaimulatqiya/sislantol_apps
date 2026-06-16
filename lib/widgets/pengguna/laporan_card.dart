@@ -69,7 +69,7 @@ class LaporanCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        laporan.jenisKejadian.toUpperCase(),
+                        laporan.displayJenisKejadian.toUpperCase(),
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,

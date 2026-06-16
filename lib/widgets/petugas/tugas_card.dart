@@ -73,7 +73,7 @@ class TugasCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        tugas.jenisKejadian.toUpperCase(),
+                        tugas.displayJenisKejadian.toUpperCase(),
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,

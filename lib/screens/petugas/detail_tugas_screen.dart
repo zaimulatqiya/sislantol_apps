@@ -228,14 +228,42 @@ class _DetailTugasScreenState extends State<DetailTugasScreen> {
         listener: (context, state) {
           if (state is PenugasanUpdateSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: AppColors.success),
+              SnackBar(
+                content: Row(
+                  children: [
+                    const Icon(Icons.check_circle_outline, color: Colors.white),
+                    const SizedBox(width: 12),
+                    Expanded(child: Text(state.message, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500))),
+                  ],
+                ),
+                backgroundColor: AppColors.success,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                margin: const EdgeInsets.only(bottom: 32, left: 24, right: 24),
+                elevation: 8,
+                duration: const Duration(seconds: 3),
+              ),
             );
             if (state.message.contains('diselesaikan')) {
               Navigator.pop(context);
             }
           } else if (state is PenugasanFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: AppColors.danger),
+              SnackBar(
+                content: Row(
+                  children: [
+                    const Icon(Icons.error_outline, color: Colors.white),
+                    const SizedBox(width: 12),
+                    Expanded(child: Text(state.message, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500))),
+                  ],
+                ),
+                backgroundColor: AppColors.danger,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                margin: const EdgeInsets.only(bottom: 32, left: 24, right: 24),
+                elevation: 8,
+                duration: const Duration(seconds: 4),
+              ),
             );
           }
         },
@@ -279,7 +307,7 @@ class _DetailTugasScreenState extends State<DetailTugasScreen> {
                         ],
                       ),
                       const Divider(height: 32, color: AppColors.border),
-                      _buildInfoRow('Jenis Kejadian', _tugas.jenisKejadian.toUpperCase(), Icons.warning_amber_rounded),
+                      _buildInfoRow('Jenis Kejadian', _tugas.displayJenisKejadian.toUpperCase(), Icons.warning_amber_rounded),
                       const SizedBox(height: 16),
                       _buildInfoRow('Lokasi', _tugas.lokasi, Icons.location_on_outlined),
                       const SizedBox(height: 16),
@@ -292,8 +320,13 @@ class _DetailTugasScreenState extends State<DetailTugasScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        _tugas.deskripsi,
-                        style: const TextStyle(fontSize: 14, color: AppColors.textPrimary, height: 1.5),
+                        _tugas.displayDeskripsi.isEmpty ? 'Tidak ada deskripsi tambahan.' : _tugas.displayDeskripsi,
+                        style: TextStyle(
+                          fontSize: 14, 
+                          color: _tugas.displayDeskripsi.isEmpty ? AppColors.textHint : AppColors.textPrimary, 
+                          fontStyle: _tugas.displayDeskripsi.isEmpty ? FontStyle.italic : FontStyle.normal,
+                          height: 1.5
+                        ),
                       ),
                       
                       if (_tugas.fotoKejadianUrls != null && _tugas.fotoKejadianUrls!.isNotEmpty) ...[
@@ -348,7 +381,15 @@ class _DetailTugasScreenState extends State<DetailTugasScreen> {
                               ],
                             ),
                             const SizedBox(height: 8),
-                            Text(_tugas.catatanAdmin, style: const TextStyle(fontSize: 13, color: AppColors.textPrimary, height: 1.5)),
+                            Text(
+                              _tugas.catatanAdmin.isEmpty ? 'Tidak ada catatan tambahan dari Admin.' : _tugas.catatanAdmin,
+                              style: TextStyle(
+                                fontSize: 13, 
+                                color: _tugas.catatanAdmin.isEmpty ? AppColors.badgeAssignText.withOpacity(0.6) : AppColors.textPrimary, 
+                                fontStyle: _tugas.catatanAdmin.isEmpty ? FontStyle.italic : FontStyle.normal,
+                                height: 1.5
+                              ),
+                            ),
                           ],
                         ),
                       )

@@ -111,18 +111,19 @@ class _LaporScreenState extends State<LaporScreen> {
 
         if (!mounted) return;
         
-        final String jenisKejadianKirim = _jenisKejadian == 'lainnya' 
-            ? _jenisKejadianLainnyaController.text 
-            : _jenisKejadian;
+        String deskripsiKirim = _deskripsiController.text;
+        if (_jenisKejadian == 'lainnya' && _jenisKejadianLainnyaController.text.isNotEmpty) {
+          deskripsiKirim = 'Jenis Kejadian: ${_jenisKejadianLainnyaController.text}\n$deskripsiKirim';
+        }
 
         context.read<LaporanBloc>().add(
               SubmitLaporan(
                 userId: authState.user.id,
                 pelaporNama: authState.user.nama,
                 pelaporNoHp: authState.user.noHp,
-                jenisKejadian: jenisKejadianKirim,
+                jenisKejadian: _jenisKejadian,
                 lokasi: _lokasiController.text,
-                deskripsi: _deskripsiController.text,
+                deskripsi: deskripsiKirim.trim(),
                 fotoPaths: finalFotoPaths,
               ),
             );
@@ -459,13 +460,13 @@ class _LaporScreenState extends State<LaporScreen> {
                     ),
                   ],
                   if (_showPhotoError)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8, left: 16),
+                    const Padding(
+                      padding: EdgeInsets.only(top: 8, left: 16),
                       child: Row(
                         children: [
-                          const Icon(Icons.error_outline, color: AppColors.danger, size: 14),
-                          const SizedBox(width: 4),
-                          const Text(
+                          Icon(Icons.error_outline, color: AppColors.danger, size: 14),
+                          SizedBox(width: 4),
+                          Text(
                             'Foto bukti wajib dilampirkan',
                             style: TextStyle(color: AppColors.danger, fontSize: 12),
                           ),

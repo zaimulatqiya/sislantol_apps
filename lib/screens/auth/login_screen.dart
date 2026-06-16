@@ -40,12 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Navigator.pushReplacementNamed(context, AppRoutes.petugasHome);
             }
           } else if (state is AuthFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: AppColors.danger,
-              ),
-            );
+            // Error ditangani di UI builder (inline)
           }
         },
         builder: (context, state) {
@@ -145,6 +140,32 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                           const SizedBox(height: 32),
+                          if (state is AuthFailure)
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              margin: const EdgeInsets.only(bottom: 24),
+                              decoration: BoxDecoration(
+                                color: AppColors.danger.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: AppColors.danger.withOpacity(0.5)),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.error_outline, color: AppColors.danger, size: 20),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      state.message,
+                                      style: const TextStyle(
+                                        color: AppColors.danger,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                         CustomTextField(
                           label: 'Email',
                           hint: 'Masukkan email anda',

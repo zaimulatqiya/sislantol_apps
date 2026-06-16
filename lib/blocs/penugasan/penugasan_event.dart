@@ -60,3 +60,12 @@ class DeletePenugasan extends PenugasanEvent {
   @override
   List<Object?> get props => [penugasanId, petugasId];
 }
+
+class DeleteSemuaPenugasanPetugas extends PenugasanEvent {
+  final String petugasId;
+
+  const DeleteSemuaPenugasanPetugas({required this.petugasId});
+
+  @override
+  List<Object?> get props => [petugasId];
+}

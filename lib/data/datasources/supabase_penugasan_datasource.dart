@@ -87,4 +87,9 @@ class SupabasePenugasanDataSource {
       'status': 'selesai',
     }).eq('id', laporanId);
   }
+
+  Future<void> deleteAllPenugasanByPetugas(String petugasId) async {
+    // Delete all assignments related to this petugas
+    await supabase.from('penugasan').delete().eq('petugas_id', petugasId);
+  }
 }

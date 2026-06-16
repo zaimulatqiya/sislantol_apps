@@ -115,4 +115,12 @@ class SupabaseLaporanDataSource {
       throw Exception('Gagal menghapus laporan: $e');
     }
   }
+
+  Future<void> deleteAllLaporanByUser(String userId) async {
+    try {
+      await _supabase.from('laporan').delete().eq('user_id', userId);
+    } catch (e) {
+      throw Exception('Gagal menghapus semua laporan: $e');
+    }
+  }
 }
