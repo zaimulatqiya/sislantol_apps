@@ -15,7 +15,7 @@ class PenugasanBloc extends Bloc<PenugasanEvent, PenugasanState> {
   }
 
   Future<void> _onLoad(LoadPenugasan event, Emitter<PenugasanState> emit) async {
-    emit(PenugasanLoading());
+    if (!event.isRefresh) emit(PenugasanLoading());
     try {
       final tugasPetugas = await penugasanDataSource.getPenugasanByPetugas(event.petugasId);
 

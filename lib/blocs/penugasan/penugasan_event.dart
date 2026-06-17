@@ -9,11 +9,12 @@ abstract class PenugasanEvent extends Equatable {
 
 class LoadPenugasan extends PenugasanEvent {
   final String petugasId;
+  final bool isRefresh;
 
-  const LoadPenugasan({required this.petugasId});
+  const LoadPenugasan({required this.petugasId, this.isRefresh = false});
 
   @override
-  List<Object?> get props => [petugasId];
+  List<Object?> get props => [petugasId, isRefresh];
 }
 
 class UpdateStatusPenugasan extends PenugasanEvent {

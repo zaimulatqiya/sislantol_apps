@@ -31,6 +31,7 @@ class SupabaseLaporanDataSource {
           .from('laporan')
           .select()
           .eq('user_id', userId)
+          .eq('is_deleted_by_user', false)
           .order('created_at', ascending: false);
       
       return (response as List).map((data) => _mapToModel(data)).toList();

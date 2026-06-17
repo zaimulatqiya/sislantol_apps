@@ -9,6 +9,7 @@ import '../../blocs/laporan/laporan_event.dart';
 import '../../blocs/laporan/laporan_state.dart';
 import '../../widgets/common/empty_state.dart';
 import '../../widgets/pengguna/laporan_card.dart';
+import '../../widgets/common/skeleton_loading.dart';
 import '../../widgets/common/custom_button.dart';
 
 class RiwayatScreen extends StatefulWidget {
@@ -150,19 +151,43 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
           ),
           body: () {
           if (state is LaporanLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const SkeletonList(count: 3, disablePadding: true);
           } else if (state is LaporanLoaded) {
             if (state.laporan.isEmpty) {
-              return const EmptyState(
-                icon: Icons.history_rounded,
-                message: 'Belum ada riwayat laporan.',
+              return RefreshIndicator(
+                onRefresh: () async {
+                  final authState = context.read<AuthBloc>().state;
+                  if (authState is AuthSuccess) {
+                    context.read<LaporanBloc>().add(LoadLaporan(userId: authState.user.id, isRefresh: true));
+                  }
+                  await Future.delayed(const Duration(seconds: 1));
+                },
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: const [
+                    SizedBox(height: 150),
+                    EmptyState(
+                      icon: Icons.history_rounded,
+                      message: 'Belum ada riwayat laporan.',
+                    ),
+                  ],
+                ),
               );
             }
 
-            return ListView.builder(
-              padding: const EdgeInsets.all(14),
-              itemCount: state.laporan.length,
-              itemBuilder: (context, index) {
+            return RefreshIndicator(
+              onRefresh: () async {
+                final authState = context.read<AuthBloc>().state;
+                if (authState is AuthSuccess) {
+                  context.read<LaporanBloc>().add(LoadLaporan(userId: authState.user.id, isRefresh: true));
+                }
+                await Future.delayed(const Duration(seconds: 1));
+              },
+              child: ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(14),
+                itemCount: state.laporan.length,
+                itemBuilder: (context, index) {
                 return Dismissible(
                   key: Key(state.laporan[index].id),
                   direction: DismissDirection.endToStart,
@@ -292,6 +317,7 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
                   ),
                 );
               },
+            ),
             );
           } else if (state is LaporanFailure) {
             return Center(child: Text(state.message));

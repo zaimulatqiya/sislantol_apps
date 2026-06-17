@@ -9,6 +9,7 @@ import '../../blocs/penugasan/penugasan_event.dart';
 import '../../blocs/penugasan/penugasan_state.dart';
 import '../../widgets/common/empty_state.dart';
 import '../../widgets/petugas/tugas_card.dart';
+import '../../widgets/common/skeleton_loading.dart';
 import '../../widgets/common/custom_button.dart';
 
 class RiwayatTugasScreen extends StatefulWidget {
@@ -150,19 +151,43 @@ class _RiwayatTugasScreenState extends State<RiwayatTugasScreen> {
           ),
           body: () {
           if (state is PenugasanLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const SkeletonList(count: 3, isPetugas: true, disablePadding: true, isRiwayat: true);
           } else if (state is PenugasanLoaded) {
             if (state.selesai.isEmpty) {
-              return const EmptyState(
-                icon: Icons.history_edu,
-                message: 'Belum ada riwayat tugas selesai.',
+              return RefreshIndicator(
+                onRefresh: () async {
+                  final authState = context.read<AuthBloc>().state;
+                  if (authState is AuthSuccess) {
+                    context.read<PenugasanBloc>().add(LoadPenugasan(petugasId: authState.user.id, isRefresh: true));
+                  }
+                  await Future.delayed(const Duration(seconds: 1));
+                },
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: const [
+                    SizedBox(height: 150),
+                    EmptyState(
+                      icon: Icons.history_edu,
+                      message: 'Belum ada riwayat tugas selesai.',
+                    ),
+                  ],
+                ),
               );
             }
 
-            return ListView.builder(
-              padding: const EdgeInsets.all(14),
-              itemCount: state.selesai.length,
-              itemBuilder: (context, index) {
+            return RefreshIndicator(
+              onRefresh: () async {
+                final authState = context.read<AuthBloc>().state;
+                if (authState is AuthSuccess) {
+                  context.read<PenugasanBloc>().add(LoadPenugasan(petugasId: authState.user.id, isRefresh: true));
+                }
+                await Future.delayed(const Duration(seconds: 1));
+              },
+              child: ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(14),
+                itemCount: state.selesai.length,
+                itemBuilder: (context, index) {
                 final tugas = state.selesai[index];
                 return Dismissible(
                   key: Key(tugas.id),
@@ -293,6 +318,7 @@ class _RiwayatTugasScreenState extends State<RiwayatTugasScreen> {
                   ),
                 );
               },
+            ),
             );
           } else if (state is PenugasanFailure) {
             return Center(

@@ -11,6 +11,7 @@ class SupabasePenugasanDataSource {
         .from('penugasan')
         .select('*, laporan(*)')
         .eq('petugas_id', petugasId)
+        .eq('is_deleted_by_petugas', false)
         .order('created_at', ascending: false);
 
     return response.map((data) {

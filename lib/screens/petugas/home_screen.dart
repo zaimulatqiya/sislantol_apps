@@ -9,6 +9,7 @@ import '../../blocs/penugasan/penugasan_event.dart';
 import '../../blocs/penugasan/penugasan_state.dart';
 import '../../widgets/common/empty_state.dart';
 import '../../widgets/petugas/tugas_card.dart';
+import '../../widgets/common/skeleton_loading.dart';
 import 'riwayat_tugas_screen.dart';
 import '../shared/profil_screen.dart';
 
@@ -97,11 +98,12 @@ class _DasborPetugasState extends State<_DasborPetugas> {
           if (authState is AuthSuccess) {
             final user = authState.user;
             return SafeArea(
+              top: false,
               child: Column(
                 children: [
                   // Header Segment
                   Container(
-                    padding: const EdgeInsets.only(left: 20, right: 20, top: 24, bottom: 48),
+                    padding: EdgeInsets.only(left: 20, right: 20, top: MediaQuery.of(context).padding.top + 24, bottom: 48),
                     decoration: const BoxDecoration(
                       gradient: LinearGradient(
                         colors: [AppColors.primary, Color(0xFF2A5298)],
@@ -192,29 +194,48 @@ class _DasborPetugasState extends State<_DasborPetugas> {
                             child: BlocBuilder<PenugasanBloc, PenugasanState>(
                               builder: (context, state) {
                                 if (state is PenugasanLoading) {
-                                  return const Center(child: CircularProgressIndicator());
+                                  return const SkeletonList(count: 2, isPetugas: true);
                                 } else if (state is PenugasanLoaded) {
                                   if (state.aktif.isEmpty) {
-                                    return const EmptyState(
-                                      icon: Icons.check_circle_outline,
-                                      message: 'Tidak ada tugas aktif.',
+                                    return RefreshIndicator(
+                                      onRefresh: () async {
+                                        context.read<PenugasanBloc>().add(LoadPenugasan(petugasId: user.id, isRefresh: true));
+                                        await Future.delayed(const Duration(seconds: 1));
+                                      },
+                                      child: ListView(
+                                        physics: const AlwaysScrollableScrollPhysics(),
+                                        children: const [
+                                          SizedBox(height: 100),
+                                          EmptyState(
+                                            icon: Icons.check_circle_outline,
+                                            message: 'Tidak ada tugas aktif.',
+                                          ),
+                                        ],
+                                      ),
                                     );
                                   }
                                   
-                                  return ListView.builder(
-                                    itemCount: state.aktif.length,
-                                    itemBuilder: (context, index) {
-                                      return TugasCard(
-                                        tugas: state.aktif[index],
-                                        onTap: () {
-                                          Navigator.pushNamed(
-                                            context,
-                                            AppRoutes.petugasDetailTugas,
-                                            arguments: state.aktif[index],
-                                          );
-                                        },
-                                      );
+                                  return RefreshIndicator(
+                                    onRefresh: () async {
+                                      context.read<PenugasanBloc>().add(LoadPenugasan(petugasId: user.id, isRefresh: true));
+                                      await Future.delayed(const Duration(seconds: 1));
                                     },
+                                    child: ListView.builder(
+                                      physics: const AlwaysScrollableScrollPhysics(),
+                                      itemCount: state.aktif.length,
+                                      itemBuilder: (context, index) {
+                                        return TugasCard(
+                                          tugas: state.aktif[index],
+                                          onTap: () {
+                                            Navigator.pushNamed(
+                                              context,
+                                              AppRoutes.petugasDetailTugas,
+                                              arguments: state.aktif[index],
+                                            );
+                                          },
+                                        );
+                                      },
+                                    ),
                                   );
                                 } else if (state is PenugasanFailure) {
                                   return Center(

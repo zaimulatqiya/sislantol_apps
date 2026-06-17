@@ -16,7 +16,7 @@ class LaporanBloc extends Bloc<LaporanEvent, LaporanState> {
   }
 
   Future<void> _onLoadLaporan(LoadLaporan event, Emitter<LaporanState> emit) async {
-    emit(LaporanLoading());
+    if (!event.isRefresh) emit(LaporanLoading());
     try {
       final laporanUser = await laporanDataSource.getLaporanByUser(event.userId);
       // Sort desc by latest

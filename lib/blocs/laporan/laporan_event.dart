@@ -9,11 +9,12 @@ abstract class LaporanEvent extends Equatable {
 
 class LoadLaporan extends LaporanEvent {
   final String userId;
+  final bool isRefresh;
 
-  const LoadLaporan({required this.userId});
+  const LoadLaporan({required this.userId, this.isRefresh = false});
 
   @override
-  List<Object?> get props => [userId];
+  List<Object?> get props => [userId, isRefresh];
 }
 
 class LoadSemuaLaporan extends LaporanEvent {}

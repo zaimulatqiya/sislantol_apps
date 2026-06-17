@@ -42,6 +42,7 @@ dependencies:
   equatable: ^2.0.8
   supabase_flutter: ^2.14.2
   flutter_dotenv: ^6.0.1
+  shimmer: ^3.0.0
 
 dev_dependencies:
   flutter_test:

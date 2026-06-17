@@ -10,6 +10,7 @@ import '../../blocs/laporan/laporan_state.dart';
 import '../../widgets/common/custom_button.dart';
 import '../../widgets/common/empty_state.dart';
 import '../../widgets/pengguna/laporan_card.dart';
+import '../../widgets/common/skeleton_loading.dart';
 import 'riwayat_screen.dart';
 import '../shared/profil_screen.dart';
 
@@ -101,13 +102,14 @@ class _BerandaPenggunaState extends State<_BerandaPengguna> {
           if (authState is AuthSuccess) {
             final user = authState.user;
             return SafeArea(
+              top: false,
               child: Stack(
                 children: [
                   Column(
                     children: [
                       // Header Section
                       Container(
-                        padding: const EdgeInsets.only(left: 20, right: 20, top: 24, bottom: 48),
+                        padding: EdgeInsets.only(left: 20, right: 20, top: MediaQuery.of(context).padding.top + 24, bottom: 48),
                         decoration: const BoxDecoration(
                           gradient: LinearGradient(
                             colors: [AppColors.primary, Color(0xFF2A5298)],
@@ -277,32 +279,51 @@ class _BerandaPenggunaState extends State<_BerandaPengguna> {
                                 child: BlocBuilder<LaporanBloc, LaporanState>(
                                   builder: (context, state) {
                                     if (state is LaporanLoading) {
-                                      return const Center(child: CircularProgressIndicator());
+                                      return const SkeletonList(count: 2);
                                     } else if (state is LaporanLoaded) {
                                       final aktif = state.laporan.where((l) => l.status != 'selesai' && l.status != 'ditolak').toList();
                                       
                                       if (aktif.isEmpty) {
-                                        return const EmptyState(
-                                          icon: Icons.assignment_turned_in_outlined,
-                                          message: 'Tidak ada laporan aktif saat ini.',
+                                        return RefreshIndicator(
+                                          onRefresh: () async {
+                                            context.read<LaporanBloc>().add(LoadLaporan(userId: user.id, isRefresh: true));
+                                            await Future.delayed(const Duration(seconds: 1));
+                                          },
+                                          child: ListView(
+                                            physics: const AlwaysScrollableScrollPhysics(),
+                                            children: const [
+                                              SizedBox(height: 100),
+                                              EmptyState(
+                                                icon: Icons.assignment_turned_in_outlined,
+                                                message: 'Tidak ada laporan aktif saat ini.',
+                                              ),
+                                            ],
+                                          ),
                                         );
                                       }
 
-                                      return ListView.builder(
-                                        padding: const EdgeInsets.only(top: 8),
-                                        itemCount: aktif.length,
-                                        itemBuilder: (context, index) {
-                                          return LaporanCard(
-                                            laporan: aktif[index],
-                                            onTap: () {
-                                              Navigator.pushNamed(
-                                                context,
-                                                AppRoutes.penggunaDetailLaporan,
-                                                arguments: aktif[index],
-                                              );
-                                            },
-                                          );
+                                      return RefreshIndicator(
+                                        onRefresh: () async {
+                                          context.read<LaporanBloc>().add(LoadLaporan(userId: user.id, isRefresh: true));
+                                          await Future.delayed(const Duration(seconds: 1));
                                         },
+                                        child: ListView.builder(
+                                          physics: const AlwaysScrollableScrollPhysics(),
+                                          padding: const EdgeInsets.only(top: 8),
+                                          itemCount: aktif.length,
+                                          itemBuilder: (context, index) {
+                                            return LaporanCard(
+                                              laporan: aktif[index],
+                                              onTap: () {
+                                                Navigator.pushNamed(
+                                                  context,
+                                                  AppRoutes.penggunaDetailLaporan,
+                                                  arguments: aktif[index],
+                                                );
+                                              },
+                                            );
+                                          },
+                                        ),
                                       );
                                     } else if (state is LaporanFailure) {
                                       return Center(child: Text(state.message, style: const TextStyle(color: AppColors.danger)));
