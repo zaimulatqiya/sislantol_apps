@@ -294,6 +294,13 @@ class _RiwayatTugasScreenState extends State<RiwayatTugasScreen> {
                 );
               },
             );
+          } else if (state is PenugasanFailure) {
+            return Center(
+              child: Text(
+                state.message,
+                style: const TextStyle(color: AppColors.danger),
+              ),
+            );
           }
           return const SizedBox();
         }(),

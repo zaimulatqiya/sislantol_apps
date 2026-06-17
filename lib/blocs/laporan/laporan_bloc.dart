@@ -23,7 +23,7 @@ class LaporanBloc extends Bloc<LaporanEvent, LaporanState> {
       laporanUser.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       emit(LaporanLoaded(laporan: laporanUser));
     } catch (e) {
-      emit(const LaporanFailure(message: 'Gagal memuat laporan.'));
+      emit(LaporanFailure(message: 'Error: $e'));
     }
   }
 
