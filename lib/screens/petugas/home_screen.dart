@@ -221,6 +221,7 @@ class _DasborPetugasState extends State<_DasborPetugas> {
                                       await Future.delayed(const Duration(seconds: 1));
                                     },
                                     child: ListView.builder(
+                                      padding: const EdgeInsets.only(top: 8),
                                       physics: const AlwaysScrollableScrollPhysics(),
                                       itemCount: state.aktif.length,
                                       itemBuilder: (context, index) {

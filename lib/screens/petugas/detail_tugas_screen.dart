@@ -437,6 +437,23 @@ class _DetailTugasScreenState extends State<DetailTugasScreen> {
         ),
       );
     }
+
+    if (currentStatus == 'dibatalkan') {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        decoration: BoxDecoration(
+          color: Colors.red.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: const Center(
+          child: Text(
+            'TUGAS DIBATALKAN',
+            style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+          ),
+        ),
+      );
+    }
     
     String label = '';
     String nextStatus = '';
