@@ -7,6 +7,7 @@ import '../../blocs/auth/auth_event.dart';
 import '../../blocs/auth/auth_state.dart';
 import '../../widgets/common/custom_button.dart';
 import '../../widgets/common/custom_text_field.dart';
+import '../../utils/network_ui_helper.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -55,7 +56,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               (route) => false,
             );
           } else if (state is AuthFailure) {
-            // Error ditangani di UI builder (inline)
+            NetworkUIHelper.showNetworkErrorSnackbar(context, message: state.message);
           }
         },
         builder: (context, state) {
@@ -100,7 +101,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   child: Column(
                     children: [
-                      if (state is AuthFailure || _localErrorMessage != null)
+                      if (_localErrorMessage != null)
                         Container(
                           padding: const EdgeInsets.all(12),
                           margin: const EdgeInsets.only(bottom: 24),
@@ -115,7 +116,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
-                                  _localErrorMessage ?? (state as AuthFailure).message,
+                                  _localErrorMessage!,
                                   style: const TextStyle(
                                     color: AppColors.danger,
                                     fontSize: 13,

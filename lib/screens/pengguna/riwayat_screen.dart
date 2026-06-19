@@ -11,6 +11,7 @@ import '../../widgets/common/empty_state.dart';
 import '../../widgets/pengguna/laporan_card.dart';
 import '../../widgets/common/skeleton_loading.dart';
 import '../../widgets/common/custom_button.dart';
+import '../../widgets/common/offline_state.dart';
 
 class RiwayatScreen extends StatefulWidget {
   const RiwayatScreen({super.key});
@@ -320,7 +321,15 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
             ),
             );
           } else if (state is LaporanFailure) {
-            return Center(child: Text(state.message));
+            return OfflineState(
+              message: state.message,
+              onRetry: () {
+                final authState = context.read<AuthBloc>().state;
+                if (authState is AuthSuccess) {
+                  context.read<LaporanBloc>().add(LoadLaporan(userId: authState.user.id, isRefresh: true));
+                }
+              },
+            );
           }
           return const SizedBox();
         }(),

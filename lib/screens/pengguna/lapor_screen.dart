@@ -10,6 +10,7 @@ import '../../blocs/laporan/laporan_event.dart';
 import '../../blocs/laporan/laporan_state.dart';
 import '../../widgets/common/custom_button.dart';
 import '../../widgets/common/custom_text_field.dart';
+import '../../utils/network_ui_helper.dart';
 
 class LaporScreen extends StatefulWidget {
   const LaporScreen({super.key});
@@ -216,10 +217,10 @@ class _LaporScreenState extends State<LaporScreen> {
               ),
             );
           } else if (state is LaporanFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: AppColors.danger),
+            NetworkUIHelper.showNetworkErrorModal(
+              context,
+              message: state.message,
+              onRetry: _submit,
             );
           }
         },

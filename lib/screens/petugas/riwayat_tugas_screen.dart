@@ -11,6 +11,7 @@ import '../../widgets/common/empty_state.dart';
 import '../../widgets/petugas/tugas_card.dart';
 import '../../widgets/common/skeleton_loading.dart';
 import '../../widgets/common/custom_button.dart';
+import '../../widgets/common/offline_state.dart';
 
 class RiwayatTugasScreen extends StatefulWidget {
   const RiwayatTugasScreen({super.key});
@@ -321,11 +322,14 @@ class _RiwayatTugasScreenState extends State<RiwayatTugasScreen> {
             ),
             );
           } else if (state is PenugasanFailure) {
-            return Center(
-              child: Text(
-                state.message,
-                style: const TextStyle(color: AppColors.danger),
-              ),
+            return OfflineState(
+              message: state.message,
+              onRetry: () {
+                final authState = context.read<AuthBloc>().state;
+                if (authState is AuthSuccess) {
+                  context.read<PenugasanBloc>().add(LoadPenugasan(petugasId: authState.user.id, isRefresh: true));
+                }
+              },
             );
           }
           return const SizedBox();

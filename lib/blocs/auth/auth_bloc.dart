@@ -5,6 +5,7 @@ import '../../models/user_model.dart';
 import '../../data/datasources/supabase_auth_datasource.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
+import '../../utils/error_handler.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final SupabaseAuthDataSource authDataSource;
@@ -44,7 +45,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
       emit(AuthSuccess(user: user));
     } catch (e) {
-      emit(AuthFailure(message: e.toString().replaceAll('Exception: ', '')));
+      emit(AuthFailure(message: ErrorHandler.cleanMessage(e)));
     }
   }
 
@@ -67,7 +68,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
       emit(AuthSuccess(user: registeredUser));
     } catch (e) {
-      emit(AuthFailure(message: e.toString()));
+      emit(AuthFailure(message: ErrorHandler.cleanMessage(e)));
     }
   }
 

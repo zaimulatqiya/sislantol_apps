@@ -12,6 +12,7 @@ import '../../blocs/penugasan/penugasan_state.dart';
 import '../../widgets/common/badge_status.dart';
 import '../../widgets/common/custom_button.dart';
 import '../../widgets/common/custom_text_field.dart';
+import '../../utils/network_ui_helper.dart';
 
 class DetailTugasScreen extends StatefulWidget {
   const DetailTugasScreen({super.key});
@@ -248,23 +249,7 @@ class _DetailTugasScreenState extends State<DetailTugasScreen> {
               Navigator.pop(context);
             }
           } else if (state is PenugasanFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: [
-                    const Icon(Icons.error_outline, color: Colors.white),
-                    const SizedBox(width: 12),
-                    Expanded(child: Text(state.message, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500))),
-                  ],
-                ),
-                backgroundColor: AppColors.danger,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                margin: const EdgeInsets.only(bottom: 32, left: 24, right: 24),
-                elevation: 8,
-                duration: const Duration(seconds: 4),
-              ),
-            );
+            NetworkUIHelper.showNetworkErrorModal(context, message: state.message);
           }
         },
         builder: (context, state) {

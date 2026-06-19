@@ -11,6 +11,7 @@ import '../../widgets/common/custom_button.dart';
 import '../../widgets/common/empty_state.dart';
 import '../../widgets/pengguna/laporan_card.dart';
 import '../../widgets/common/skeleton_loading.dart';
+import '../../widgets/common/offline_state.dart';
 import 'riwayat_screen.dart';
 import '../shared/profil_screen.dart';
 
@@ -326,7 +327,12 @@ class _BerandaPenggunaState extends State<_BerandaPengguna> {
                                         ),
                                       );
                                     } else if (state is LaporanFailure) {
-                                      return Center(child: Text(state.message, style: const TextStyle(color: AppColors.danger)));
+                                      return OfflineState(
+                                        message: state.message,
+                                        onRetry: () {
+                                          context.read<LaporanBloc>().add(LoadLaporan(userId: user.id, isRefresh: true));
+                                        },
+                                      );
                                     }
                                     return const SizedBox();
                                   },

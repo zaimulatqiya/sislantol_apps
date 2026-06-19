@@ -3,6 +3,7 @@ import '../../models/laporan_model.dart';
 import '../../data/datasources/supabase_laporan_datasource.dart';
 import 'laporan_event.dart';
 import 'laporan_state.dart';
+import '../../utils/error_handler.dart';
 
 class LaporanBloc extends Bloc<LaporanEvent, LaporanState> {
   final SupabaseLaporanDataSource laporanDataSource;
@@ -23,7 +24,7 @@ class LaporanBloc extends Bloc<LaporanEvent, LaporanState> {
       laporanUser.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       emit(LaporanLoaded(laporan: laporanUser));
     } catch (e) {
-      emit(LaporanFailure(message: 'Error: $e'));
+      emit(LaporanFailure(message: ErrorHandler.cleanMessage(e)));
     }
   }
 
@@ -34,7 +35,7 @@ class LaporanBloc extends Bloc<LaporanEvent, LaporanState> {
       semuaLaporan.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       emit(LaporanLoaded(laporan: semuaLaporan));
     } catch (e) {
-      emit(const LaporanFailure(message: 'Gagal memuat semua laporan.'));
+      emit(LaporanFailure(message: ErrorHandler.cleanMessage(e)));
     }
   }
 
@@ -59,7 +60,7 @@ class LaporanBloc extends Bloc<LaporanEvent, LaporanState> {
       // Re-load the specific user laporan
       add(LoadLaporan(userId: event.userId));
     } catch (e) {
-      emit(LaporanFailure(message: 'Gagal mengirim laporan: $e'));
+      emit(LaporanFailure(message: ErrorHandler.cleanMessage(e)));
     }
   }
 
@@ -70,7 +71,7 @@ class LaporanBloc extends Bloc<LaporanEvent, LaporanState> {
       // Re-load the specific user laporan
       add(LoadLaporan(userId: event.userId));
     } catch (e) {
-      emit(LaporanFailure(message: 'Gagal menghapus laporan: $e'));
+      emit(LaporanFailure(message: ErrorHandler.cleanMessage(e)));
     }
   }
 
@@ -80,7 +81,7 @@ class LaporanBloc extends Bloc<LaporanEvent, LaporanState> {
       await laporanDataSource.deleteAllLaporanByUser(event.userId);
       add(LoadLaporan(userId: event.userId));
     } catch (e) {
-      emit(LaporanFailure(message: 'Gagal menghapus semua riwayat laporan: $e'));
+      emit(LaporanFailure(message: ErrorHandler.cleanMessage(e)));
     }
   }
 }

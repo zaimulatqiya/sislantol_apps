@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../data/datasources/supabase_penugasan_datasource.dart';
 import 'penugasan_event.dart';
 import 'penugasan_state.dart';
+import '../../utils/error_handler.dart';
 
 class PenugasanBloc extends Bloc<PenugasanEvent, PenugasanState> {
   final SupabasePenugasanDataSource penugasanDataSource;
@@ -27,7 +28,7 @@ class PenugasanBloc extends Bloc<PenugasanEvent, PenugasanState> {
 
       emit(PenugasanLoaded(aktif: aktif, selesai: selesai));
     } catch (e) {
-      emit(const PenugasanFailure(message: 'Gagal memuat data penugasan.'));
+      emit(PenugasanFailure(message: ErrorHandler.cleanMessage(e)));
     }
   }
 
@@ -38,7 +39,7 @@ class PenugasanBloc extends Bloc<PenugasanEvent, PenugasanState> {
       emit(const PenugasanUpdateSuccess('Status berhasil diperbarui'));
       add(LoadPenugasan(petugasId: event.petugasId));
     } catch (e) {
-      emit(PenugasanFailure(message: 'Penugasan gagal diupdate: $e'));
+      emit(PenugasanFailure(message: ErrorHandler.cleanMessage(e)));
     }
   }
 
@@ -64,7 +65,7 @@ class PenugasanBloc extends Bloc<PenugasanEvent, PenugasanState> {
       emit(const PenugasanUpdateSuccess('Tugas berhasil diselesaikan'));
       add(LoadPenugasan(petugasId: event.petugasId));
     } catch (e) {
-      emit(PenugasanFailure(message: 'Penugasan gagal diselesaikan: $e'));
+      emit(PenugasanFailure(message: ErrorHandler.cleanMessage(e)));
     }
   }
 
@@ -74,7 +75,7 @@ class PenugasanBloc extends Bloc<PenugasanEvent, PenugasanState> {
       await penugasanDataSource.deletePenugasan(event.penugasanId);
       add(LoadPenugasan(petugasId: event.petugasId));
     } catch (e) {
-      emit(PenugasanFailure(message: 'Gagal menghapus riwayat penugasan: $e'));
+      emit(PenugasanFailure(message: ErrorHandler.cleanMessage(e)));
     }
   }
 
@@ -84,7 +85,7 @@ class PenugasanBloc extends Bloc<PenugasanEvent, PenugasanState> {
       await penugasanDataSource.deleteAllPenugasanByPetugas(event.petugasId);
       add(LoadPenugasan(petugasId: event.petugasId));
     } catch (e) {
-      emit(PenugasanFailure(message: 'Gagal menghapus semua riwayat penugasan: $e'));
+      emit(PenugasanFailure(message: ErrorHandler.cleanMessage(e)));
     }
   }
 }

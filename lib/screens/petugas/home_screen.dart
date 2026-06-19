@@ -10,6 +10,7 @@ import '../../blocs/penugasan/penugasan_state.dart';
 import '../../widgets/common/empty_state.dart';
 import '../../widgets/petugas/tugas_card.dart';
 import '../../widgets/common/skeleton_loading.dart';
+import '../../widgets/common/offline_state.dart';
 import 'riwayat_tugas_screen.dart';
 import '../shared/profil_screen.dart';
 
@@ -239,11 +240,11 @@ class _DasborPetugasState extends State<_DasborPetugas> {
                                     ),
                                   );
                                 } else if (state is PenugasanFailure) {
-                                  return Center(
-                                    child: Text(
-                                      state.message,
-                                      style: const TextStyle(color: AppColors.danger),
-                                    ),
+                                  return OfflineState(
+                                    message: state.message,
+                                    onRetry: () {
+                                      context.read<PenugasanBloc>().add(LoadPenugasan(petugasId: user.id, isRefresh: true));
+                                    },
                                   );
                                 }
                                 return const SizedBox();
