@@ -33,7 +33,10 @@ class SislantolApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<AuthBloc>(create: (_) => AuthBloc(authDataSource: SupabaseAuthDataSource())),
+        BlocProvider<AuthBloc>(
+          create: (_) => AuthBloc(authDataSource: SupabaseAuthDataSource()),
+          lazy: false,
+        ),
         BlocProvider<LaporanBloc>(create: (_) => LaporanBloc(laporanDataSource: SupabaseLaporanDataSource())),
         BlocProvider<PenugasanBloc>(create: (_) => PenugasanBloc(penugasanDataSource: SupabasePenugasanDataSource())),
         BlocProvider<SplashCubit>(create: (_) => SplashCubit()),

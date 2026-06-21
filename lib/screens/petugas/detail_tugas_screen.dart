@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'dart:convert';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -25,6 +27,40 @@ class _DetailTugasScreenState extends State<DetailTugasScreen> {
   final _catatanPenutupController = TextEditingController();
   late PenugasanModel _tugas;
   bool _isInit = false;
+
+  ImageProvider _getImageProvider(String url) {
+    if (kIsWeb) return NetworkImage(url);
+    if (url.startsWith('data:image')) return MemoryImage(base64Decode(url.split(',').last));
+    if (url.startsWith('http')) return NetworkImage(url);
+    return FileImage(File(url));
+  }
+
+  void _showImagePreview(BuildContext context, String url) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Scaffold(
+          backgroundColor: Colors.black,
+          appBar: AppBar(
+            backgroundColor: Colors.black,
+            iconTheme: const IconThemeData(color: Colors.white),
+            elevation: 0,
+          ),
+          body: Center(
+            child: InteractiveViewer(
+              panEnabled: true,
+              minScale: 0.5,
+              maxScale: 4.0,
+              child: Image(
+                image: _getImageProvider(url),
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   void didChangeDependencies() {
@@ -180,29 +216,34 @@ class _DetailTugasScreenState extends State<DetailTugasScreen> {
                     maxLines: 3,
                   ),
                   const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: CustomButton(
-                      label: 'KIRIM & SELESAIKAN',
-                      onPressed: () async {
-                        if (pickedImage == null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Foto bukti wajib dilampirkan'), backgroundColor: AppColors.danger)
-                          );
-                          return;
-                        }
-                        
-                        context.read<PenugasanBloc>().add(
-                              SelesaikanTugas(
-                                penugasanId: tugas.id,
-                                fotoPath: pickedImage!.path,
-                                catatanPenutup: _catatanPenutupController.text,
-                                petugasId: petugasId,
-                              ),
-                            );
-                        Navigator.pop(bottomSheetContext); // Close bottom sheet only
-                      },
-                    ),
+                  BlocBuilder<PenugasanBloc, PenugasanState>(
+                    builder: (context, state) {
+                      return SizedBox(
+                        width: double.infinity,
+                        child: CustomButton(
+                          label: 'KIRIM & SELESAIKAN',
+                          isLoading: state is PenugasanLoading,
+                          onPressed: () async {
+                            if (pickedImage == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Foto bukti wajib dilampirkan'), backgroundColor: AppColors.danger)
+                              );
+                              return;
+                            }
+                            
+                            context.read<PenugasanBloc>().add(
+                                  SelesaikanTugas(
+                                    penugasanId: tugas.id,
+                                    fotoPath: pickedImage!.path,
+                                    catatanPenutup: _catatanPenutupController.text,
+                                    petugasId: petugasId,
+                                  ),
+                                );
+                            // Hapus Navigator.pop di sini agar tidak langsung tertutup sebelum proses selesai.
+                          },
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 24),
                 ],
@@ -246,7 +287,7 @@ class _DetailTugasScreenState extends State<DetailTugasScreen> {
               ),
             );
             if (state.message.contains('diselesaikan')) {
-              Navigator.pop(context);
+              Navigator.popUntil(context, (route) => route.isFirst);
             }
           } else if (state is PenugasanFailure) {
             NetworkUIHelper.showNetworkErrorModal(context, message: state.message);
@@ -330,15 +371,19 @@ class _DetailTugasScreenState extends State<DetailTugasScreen> {
                             scrollDirection: Axis.horizontal,
                             itemCount: _tugas.fotoKejadianUrls!.length,
                             itemBuilder: (context, index) {
-                              return Container(
-                                width: 160,
-                                margin: const EdgeInsets.only(right: 12),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: AppColors.border),
-                                  image: DecorationImage(
-                                    image: NetworkImage(_tugas.fotoKejadianUrls![index]),
-                                    fit: BoxFit.cover,
+                              final String url = _tugas.fotoKejadianUrls![index];
+                              return GestureDetector(
+                                onTap: () => _showImagePreview(context, url),
+                                child: Container(
+                                  width: 160,
+                                  margin: const EdgeInsets.only(right: 12),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: AppColors.border),
+                                    image: DecorationImage(
+                                      image: _getImageProvider(url),
+                                      fit: BoxFit.cover,
+                                    ),
                                   ),
                                 ),
                               );

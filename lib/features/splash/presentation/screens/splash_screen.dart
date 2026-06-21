@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_routes.dart';
+import '../../../../utils/network_ui_helper.dart';
 import '../../../../blocs/auth/auth_bloc.dart';
 import '../../../../blocs/auth/auth_state.dart';
 import '../bloc/splash_cubit.dart';
@@ -74,6 +75,14 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       listener: (context, state) {
         if (state is SplashCompleted) {
           _navigateToNextScreen();
+        } else if (state is SplashError) {
+          NetworkUIHelper.showNetworkErrorModal(
+            context,
+            message: state.message,
+            onRetry: () {
+              context.read<SplashCubit>().initializeApp();
+            },
+          );
         }
       },
       child: Scaffold(

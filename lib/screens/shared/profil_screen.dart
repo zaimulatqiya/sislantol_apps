@@ -117,8 +117,123 @@ class ProfilScreen extends StatelessWidget {
                     label: 'Keluar',
                     color: AppColors.danger,
                     onPressed: () {
-                      context.read<AuthBloc>().add(LogoutRequested());
-                      Navigator.pushNamedAndRemoveUntil(context, AppRoutes.login, (route) => false);
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (BuildContext dialogContext) {
+                          return BlocConsumer<AuthBloc, AuthState>(
+                            listener: (context, state) {
+                              if (state is AuthUnauthenticated) {
+                                Navigator.pop(dialogContext); // Tutup dialog
+                                Navigator.pushNamedAndRemoveUntil(context, AppRoutes.login, (route) => false);
+                              }
+                            },
+                            builder: (context, state) {
+                              final isLoading = state is AuthLoading;
+                              return Dialog(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(24.0),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(16),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.danger.withOpacity(0.1),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.logout_rounded,
+                                          color: AppColors.danger,
+                                          size: 32,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 20),
+                                      const Text(
+                                        'Konfirmasi Keluar',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.textPrimary,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      const Text(
+                                        'Apakah Anda yakin ingin keluar dari akun ini?',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: AppColors.textBody,
+                                          height: 1.5,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 24),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: TextButton(
+                                              onPressed: isLoading ? null : () => Navigator.pop(dialogContext),
+                                              style: TextButton.styleFrom(
+                                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(12),
+                                                ),
+                                              ),
+                                              child: const Text(
+                                                'Batal',
+                                                style: TextStyle(
+                                                  color: AppColors.textMuted,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Expanded(
+                                            child: ElevatedButton(
+                                              onPressed: isLoading ? null : () {
+                                                context.read<AuthBloc>().add(LogoutRequested());
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: AppColors.danger,
+                                                disabledBackgroundColor: AppColors.danger.withOpacity(0.6),
+                                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                                elevation: 0,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(12),
+                                                ),
+                                              ),
+                                              child: isLoading
+                                                  ? const SizedBox(
+                                                      height: 20,
+                                                      width: 20,
+                                                      child: CircularProgressIndicator(
+                                                        color: Colors.white,
+                                                        strokeWidth: 2.5,
+                                                      ),
+                                                    )
+                                                  : const Text(
+                                                      'Ya, Keluar',
+                                                      style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontWeight: FontWeight.w600,
+                                                      ),
+                                                    ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      );
                     },
                   ),
                 ],
