@@ -7,6 +7,17 @@ abstract class PenugasanEvent extends Equatable {
   List<Object?> get props => [];
 }
 
+/// Mulai mendengarkan perubahan real-time pada tabel penugasan
+/// untuk petugas tertentu. Hanya perlu dipanggil sekali.
+class SubscribePenugasanRealtime extends PenugasanEvent {
+  final String petugasId;
+
+  const SubscribePenugasanRealtime({required this.petugasId});
+
+  @override
+  List<Object?> get props => [petugasId];
+}
+
 class LoadPenugasan extends PenugasanEvent {
   final String petugasId;
   final bool isRefresh;
@@ -34,19 +45,19 @@ class UpdateStatusPenugasan extends PenugasanEvent {
 
 class SelesaikanTugas extends PenugasanEvent {
   final String penugasanId;
-  final String? fotoPath;
+  final List<String>? fotoPaths;
   final String? catatanPenutup;
   final String petugasId; // To reload data
 
   const SelesaikanTugas({
     required this.penugasanId,
-    this.fotoPath,
+    this.fotoPaths,
     this.catatanPenutup,
     required this.petugasId,
   });
 
   @override
-  List<Object?> get props => [penugasanId, fotoPath, catatanPenutup, petugasId];
+  List<Object?> get props => [penugasanId, fotoPaths, catatanPenutup, petugasId];
 }
 
 class DeletePenugasan extends PenugasanEvent {

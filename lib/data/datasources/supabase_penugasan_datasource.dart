@@ -58,27 +58,34 @@ class SupabasePenugasanDataSource {
   Future<void> selesaikanTugas({
     required String penugasanId,
     required String laporanId,
-    required String fotoPath,
+    required List<String> fotoPaths,
     required String catatanPenutup,
   }) async {
-    final file = File(fotoPath);
-    final fileName = '${DateTime.now().millisecondsSinceEpoch}_penyelesaian.jpg';
-    final bucketPath = '$laporanId/$fileName';
+    List<String> fotoUrls = [];
 
-    // 1. Upload foto bukti ke storage
-    await supabase.storage.from('bukti-penyelesaian').upload(
-          bucketPath,
-          file,
-          fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
-        );
+    for (int i = 0; i < fotoPaths.length; i++) {
+      final file = File(fotoPaths[i]);
+      final fileName = '${DateTime.now().millisecondsSinceEpoch}_penyelesaian_$i.jpg';
+      final bucketPath = '$laporanId/$fileName';
 
-    // 2. Dapatkan URL publik dari foto yang diunggah
-    final fotoUrl = supabase.storage.from('bukti-penyelesaian').getPublicUrl(bucketPath);
+      // 1. Upload foto bukti ke storage
+      await supabase.storage.from('bukti-penyelesaian').upload(
+            bucketPath,
+            file,
+            fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
+          );
+
+      // 2. Dapatkan URL publik dari foto yang diunggah
+      final fotoUrl = supabase.storage.from('bukti-penyelesaian').getPublicUrl(bucketPath);
+      fotoUrls.add(fotoUrl);
+    }
+
+    final joinedUrls = fotoUrls.join(',');
 
     // 3. Update status penugasan menjadi selesai beserta catatannya
     await supabase.from('penugasan').update({
       'status': 'selesai',
-      'foto_bukti_url': fotoUrl,
+      'foto_bukti_url': joinedUrls,
       'catatan_penutup': catatanPenutup,
       'selesai_at': DateTime.now().toIso8601String(),
     }).eq('id', penugasanId);

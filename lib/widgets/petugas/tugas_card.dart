@@ -113,26 +113,36 @@ class TugasCard extends StatelessWidget {
                 )
               ],
             ),
-            if (tugas.fotoBuktiUrl != null || (tugas.catatanPenutup != null && tugas.catatanPenutup!.isNotEmpty)) ...[
+            if (tugas.listFotoBuktiUrls.isNotEmpty || (tugas.catatanPenutup != null && tugas.catatanPenutup!.isNotEmpty)) ...[
               const Padding(
                 padding: EdgeInsets.only(top: 16, bottom: 12),
                 child: Divider(height: 1, color: AppColors.border),
               ),
-              if (tugas.fotoBuktiUrl != null) ...[
+              if (tugas.listFotoBuktiUrls.isNotEmpty) ...[
                 const Text(
                   'Foto Bukti Penanganan:',
                   style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                 ),
                 const SizedBox(height: 8),
-                Container(
+                SizedBox(
                   height: 120,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    image: DecorationImage(
-                      image: _getImageProvider(tugas.fotoBuktiUrl!),
-                      fit: BoxFit.cover,
-                    ),
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: tugas.listFotoBuktiUrls.length,
+                    itemBuilder: (context, index) {
+                      final url = tugas.listFotoBuktiUrls[index];
+                      return Container(
+                        width: 120,
+                        margin: const EdgeInsets.only(right: 12),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          image: DecorationImage(
+                            image: _getImageProvider(url),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(height: 12),

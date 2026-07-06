@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class PenugasanModel {
   final String id;
   final String laporanId;
@@ -22,6 +24,16 @@ class PenugasanModel {
       }
     }
     return jenisKejadian;
+  }
+
+  List<String> get listFotoBuktiUrls {
+    if (fotoBuktiUrl == null || fotoBuktiUrl!.isEmpty) return [];
+    if (fotoBuktiUrl!.startsWith('[')) {
+      try {
+        return List<String>.from(jsonDecode(fotoBuktiUrl!));
+      } catch (_) {}
+    }
+    return fotoBuktiUrl!.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
   }
 
   String get displayDeskripsi {

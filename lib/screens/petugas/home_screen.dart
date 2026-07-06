@@ -89,6 +89,8 @@ class _DasborPetugasState extends State<_DasborPetugas> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthSuccess) {
       context.read<PenugasanBloc>().add(LoadPenugasan(petugasId: authState.user.id));
+      // Mulai mendengarkan perubahan real-time (guard duplikasi ada di dalam BLoC)
+      context.read<PenugasanBloc>().add(SubscribePenugasanRealtime(petugasId: authState.user.id));
     }
   }
 

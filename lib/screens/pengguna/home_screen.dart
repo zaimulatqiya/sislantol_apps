@@ -93,6 +93,8 @@ class _BerandaPenggunaState extends State<_BerandaPengguna> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthSuccess) {
       context.read<LaporanBloc>().add(LoadLaporan(userId: authState.user.id));
+      // Mulai mendengarkan perubahan real-time (guard duplikasi ada di dalam BLoC)
+      context.read<LaporanBloc>().add(SubscribeLaporanRealtime(userId: authState.user.id));
     }
   }
 

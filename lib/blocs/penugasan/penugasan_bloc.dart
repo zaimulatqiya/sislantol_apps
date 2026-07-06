@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../data/datasources/supabase_penugasan_datasource.dart';
 import 'penugasan_event.dart';
 import 'penugasan_state.dart';
@@ -7,8 +8,12 @@ import '../../utils/error_handler.dart';
 class PenugasanBloc extends Bloc<PenugasanEvent, PenugasanState> {
   final SupabasePenugasanDataSource penugasanDataSource;
 
+  /// Channel Supabase Realtime aktif (jika ada)
+  RealtimeChannel? _realtimeChannel;
+
   PenugasanBloc({required this.penugasanDataSource}) : super(PenugasanInitial()) {
     on<LoadPenugasan>(_onLoad);
+    on<SubscribePenugasanRealtime>(_onSubscribeRealtime);
     on<UpdateStatusPenugasan>(_onUpdateStatus);
     on<SelesaikanTugas>(_onSelesaikan);
     on<DeletePenugasan>(_onDeletePenugasan);
@@ -32,6 +37,39 @@ class PenugasanBloc extends Bloc<PenugasanEvent, PenugasanState> {
     }
   }
 
+  /// Mulai subscribe Supabase Realtime untuk petugas tertentu.
+  /// Jika channel sudah aktif, tidak melakukan apa-apa (mencegah duplikasi).
+  Future<void> _onSubscribeRealtime(
+    SubscribePenugasanRealtime event,
+    Emitter<PenugasanState> emit,
+  ) async {
+    // Guard: Jika sudah ada channel aktif, jangan buat yang baru
+    if (_realtimeChannel != null) return;
+
+    final supabase = Supabase.instance.client;
+    final channelName = 'penugasan-petugas-${event.petugasId}';
+
+    _realtimeChannel = supabase
+        .channel(channelName)
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'penugasan',
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'petugas_id',
+            value: event.petugasId,
+          ),
+          callback: (payload) {
+            // Saat ada perubahan di DB, reload data tanpa loading indicator
+            if (!isClosed) {
+              add(LoadPenugasan(petugasId: event.petugasId, isRefresh: true));
+            }
+          },
+        )
+        .subscribe();
+  }
+
   Future<void> _onUpdateStatus(UpdateStatusPenugasan event, Emitter<PenugasanState> emit) async {
     emit(PenugasanLoading());
     try {
@@ -51,14 +89,14 @@ class PenugasanBloc extends Bloc<PenugasanEvent, PenugasanState> {
       final tugasList = await penugasanDataSource.getPenugasanByPetugas(event.petugasId);
       final existing = tugasList.firstWhere((p) => p.id == event.penugasanId);
 
-      if (event.fotoPath == null) {
-        throw Exception("Foto bukti wajib dilampirkan");
+      if (event.fotoPaths == null || event.fotoPaths!.isEmpty) {
+        throw Exception("Minimal satu foto bukti wajib dilampirkan");
       }
 
       await penugasanDataSource.selesaikanTugas(
         penugasanId: existing.id,
         laporanId: existing.laporanId,
-        fotoPath: event.fotoPath!,
+        fotoPaths: event.fotoPaths!,
         catatanPenutup: event.catatanPenutup ?? '',
       );
 
@@ -87,5 +125,15 @@ class PenugasanBloc extends Bloc<PenugasanEvent, PenugasanState> {
     } catch (e) {
       emit(PenugasanFailure(message: ErrorHandler.cleanMessage(e)));
     }
+  }
+
+  @override
+  Future<void> close() async {
+    // Unsubscribe channel Realtime saat BLoC di-dispose
+    if (_realtimeChannel != null) {
+      await Supabase.instance.client.removeChannel(_realtimeChannel!);
+      _realtimeChannel = null;
+    }
+    return super.close();
   }
 }

@@ -7,6 +7,17 @@ abstract class LaporanEvent extends Equatable {
   List<Object?> get props => [];
 }
 
+/// Mulai mendengarkan perubahan real-time pada tabel laporan
+/// untuk pengguna tertentu. Hanya perlu dipanggil sekali.
+class SubscribeLaporanRealtime extends LaporanEvent {
+  final String userId;
+
+  const SubscribeLaporanRealtime({required this.userId});
+
+  @override
+  List<Object?> get props => [userId];
+}
+
 class LoadLaporan extends LaporanEvent {
   final String userId;
   final bool isRefresh;

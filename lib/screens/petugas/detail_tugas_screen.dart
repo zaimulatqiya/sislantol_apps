@@ -78,7 +78,7 @@ class _DetailTugasScreenState extends State<DetailTugasScreen> {
   }
 
   void _showSelesaikanBottomSheet(BuildContext context, PenugasanModel tugas, String petugasId) {
-    XFile? pickedImage;
+    List<XFile> pickedImages = [];
     final ImagePicker picker = ImagePicker();
 
     showModalBottomSheet(
@@ -90,11 +90,20 @@ class _DetailTugasScreenState extends State<DetailTugasScreen> {
           builder: (BuildContext context, StateSetter setModalState) {
             void pickImage(ImageSource source) async {
               try {
-                final XFile? image = await picker.pickImage(source: source);
-                if (image != null) {
-                  setModalState(() {
-                    pickedImage = image;
-                  });
+                if (source == ImageSource.gallery) {
+                  final List<XFile> images = await picker.pickMultiImage();
+                  if (images.isNotEmpty) {
+                    setModalState(() {
+                      pickedImages.addAll(images);
+                    });
+                  }
+                } else {
+                  final XFile? image = await picker.pickImage(source: source);
+                  if (image != null) {
+                    setModalState(() {
+                      pickedImages.add(image);
+                    });
+                  }
                 }
               } catch (e) {
                 debugPrint('Error picking image: $e');
@@ -165,17 +174,65 @@ class _DetailTugasScreenState extends State<DetailTugasScreen> {
                   ),
                   const SizedBox(height: 8),
                   GestureDetector(
-                    onTap: showImageSourceActionSheet,
-                    child: pickedImage != null 
-                      ? Container(
-                          width: double.infinity,
+                    onTap: () {
+                      if (pickedImages.isEmpty) {
+                        showImageSourceActionSheet();
+                      }
+                    },
+                    child: pickedImages.isNotEmpty 
+                      ? SizedBox(
                           height: 120,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            image: DecorationImage(
-                              image: FileImage(File(pickedImage!.path)) as ImageProvider,
-                              fit: BoxFit.cover,
-                            ),
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: pickedImages.length + 1,
+                            itemBuilder: (context, index) {
+                              if (index == pickedImages.length) {
+                                return GestureDetector(
+                                  onTap: showImageSourceActionSheet,
+                                  child: Container(
+                                    width: 120,
+                                    margin: const EdgeInsets.only(left: 12),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primaryLight.withOpacity(0.5),
+                                      borderRadius: BorderRadius.circular(16),
+                                      border: Border.all(color: AppColors.primary.withOpacity(0.2), width: 1.5, style: BorderStyle.solid),
+                                    ),
+                                    child: const Center(child: Icon(Icons.add_a_photo, color: AppColors.primary)),
+                                  ),
+                                );
+                              }
+                              return Stack(
+                                children: [
+                                  Container(
+                                    width: 120,
+                                    margin: EdgeInsets.only(right: index < pickedImages.length - 1 ? 12 : 0),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(16),
+                                      image: DecorationImage(
+                                        image: FileImage(File(pickedImages[index].path)) as ImageProvider,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    top: 4,
+                                    right: index < pickedImages.length - 1 ? 16 : 4,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        setModalState(() {
+                                          pickedImages.removeAt(index);
+                                        });
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.all(4),
+                                        decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
+                                        child: const Icon(Icons.close, size: 16, color: Colors.white),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
                           ),
                         )
                       : Container(
@@ -224,9 +281,9 @@ class _DetailTugasScreenState extends State<DetailTugasScreen> {
                           label: 'KIRIM & SELESAIKAN',
                           isLoading: state is PenugasanLoading,
                           onPressed: () async {
-                            if (pickedImage == null) {
+                            if (pickedImages.isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Foto bukti wajib dilampirkan'), backgroundColor: AppColors.danger)
+                                const SnackBar(content: Text('Minimal satu foto bukti wajib dilampirkan'), backgroundColor: AppColors.danger)
                               );
                               return;
                             }
@@ -234,7 +291,7 @@ class _DetailTugasScreenState extends State<DetailTugasScreen> {
                             context.read<PenugasanBloc>().add(
                                   SelesaikanTugas(
                                     penugasanId: tugas.id,
-                                    fotoPath: pickedImage!.path,
+                                    fotoPaths: pickedImages.map((e) => e.path).toList(),
                                     catatanPenutup: _catatanPenutupController.text,
                                     petugasId: petugasId,
                                   ),
