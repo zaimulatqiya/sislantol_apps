@@ -5,6 +5,10 @@ import '../../core/constants/app_routes.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_event.dart';
 import '../../blocs/auth/auth_state.dart';
+import '../../blocs/laporan/laporan_bloc.dart';
+import '../../blocs/laporan/laporan_event.dart';
+import '../../blocs/penugasan/penugasan_bloc.dart';
+import '../../blocs/penugasan/penugasan_event.dart';
 import '../../widgets/common/custom_button.dart';
 import '../../widgets/common/skeleton_loading.dart';
 
@@ -44,7 +48,7 @@ class ProfilScreen extends StatelessWidget {
                       ),
                       child: Center(
                         child: Text(
-                          user.nama.substring(0, 1).toUpperCase(),
+                          user.nama.isNotEmpty ? user.nama.substring(0, 1).toUpperCase() : 'U',
                           style: const TextStyle(
                             fontSize: 40,
                             fontWeight: FontWeight.bold,
@@ -195,6 +199,8 @@ class ProfilScreen extends StatelessWidget {
                                           Expanded(
                                             child: ElevatedButton(
                                               onPressed: isLoading ? null : () {
+                                                context.read<LaporanBloc>().add(UnsubscribeLaporanRealtime());
+                                                context.read<PenugasanBloc>().add(UnsubscribePenugasanRealtime());
                                                 context.read<AuthBloc>().add(LogoutRequested());
                                               },
                                               style: ElevatedButton.styleFrom(

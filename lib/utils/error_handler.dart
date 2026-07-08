@@ -1,8 +1,19 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 class ErrorHandler {
   /// Menerjemahkan pesan error raw (seperti Exception/SocketException) menjadi pesan bahasa Indonesia yang bersih
   static String cleanMessage(dynamic error) {
     if (error == null) return 'Terjadi kesalahan tidak dikenal.';
     
+    if (error is PostgrestException) {
+      if (error.code == '23505') return 'Data sudah ada (duplikat).';
+      if (error.code == '23503') return 'Data tidak dapat dihapus karena masih digunakan di tempat lain.';
+      return error.message;
+    }
+    if (error is AuthException) {
+      return error.message;
+    }
+
     final errorString = error.toString().toLowerCase();
 
     // Koneksi

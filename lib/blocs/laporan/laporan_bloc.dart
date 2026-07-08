@@ -16,6 +16,7 @@ class LaporanBloc extends Bloc<LaporanEvent, LaporanState> {
     on<LoadLaporan>(_onLoadLaporan);
     on<LoadSemuaLaporan>(_onLoadSemuaLaporan);
     on<SubscribeLaporanRealtime>(_onSubscribeRealtime);
+    on<UnsubscribeLaporanRealtime>(_onUnsubscribeRealtime);
     on<SubmitLaporan>(_onSubmitLaporan);
     on<DeleteLaporan>(_onDeleteLaporan);
     on<DeleteSemuaLaporanUser>(_onDeleteSemuaLaporanUser);
@@ -75,6 +76,16 @@ class LaporanBloc extends Bloc<LaporanEvent, LaporanState> {
           },
         )
         .subscribe();
+  }
+
+  Future<void> _onUnsubscribeRealtime(
+    UnsubscribeLaporanRealtime event,
+    Emitter<LaporanState> emit,
+  ) async {
+    if (_realtimeChannel != null) {
+      await Supabase.instance.client.removeChannel(_realtimeChannel!);
+      _realtimeChannel = null;
+    }
   }
 
   Future<void> _onSubmitLaporan(SubmitLaporan event, Emitter<LaporanState> emit) async {

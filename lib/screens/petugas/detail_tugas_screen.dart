@@ -357,7 +357,20 @@ class _DetailTugasScreenState extends State<DetailTugasScreen> {
             } catch (e) {
               try {
                 _tugas = state.selesai.firstWhere((t) => t.id == _tugas.id);
-              } catch (e) {}
+              } catch (e) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Tugas telah dihapus atau tidak ditemukan.'),
+                        backgroundColor: AppColors.danger,
+                      ),
+                    );
+                    Navigator.popUntil(context, (route) => route.isFirst);
+                  }
+                });
+                return const Center(child: CircularProgressIndicator());
+              }
             }
           }
 

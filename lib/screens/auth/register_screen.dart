@@ -22,6 +22,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _noHpController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
   bool _obscurePassword = true;
   String? _localErrorMessage;
 
@@ -127,76 +128,103 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ],
                           ),
                         ),
-                      CustomTextField(
-                        label: 'Nama Lengkap',
-                        hint: 'Nama sesuai KTP/SIM',
-                        controller: _namaController,
-                      ),
-                      const SizedBox(height: 16),
-                      CustomTextField(
-                        label: 'Email',
-                        hint: 'email@contoh.com',
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
-                      ),
-                      const SizedBox(height: 16),
-                      CustomTextField(
-                        label: 'Nomor HP',
-                        hint: '08xxxxxxxxx',
-                        controller: _noHpController,
-                        keyboardType: TextInputType.phone,
-                      ),
-                      const SizedBox(height: 16),
-                      CustomTextField(
-                        label: 'Password',
-                        hint: 'Minimal 6 karakter',
-                        controller: _passwordController,
-                        obscureText: _obscurePassword,
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                            size: 16,
-                            color: AppColors.textHint,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _obscurePassword = !_obscurePassword;
-                            });
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      CustomTextField(
-                        label: 'Konfirmasi Password',
-                        hint: 'Tulis ulang password',
-                        controller: _confirmPasswordController,
-                        obscureText: _obscurePassword,
-                      ),
-                      const SizedBox(height: 32),
-                      SizedBox(
-                        width: double.infinity,
-                        child: CustomButton(
-                          label: 'Daftar Sekarang',
-                          isLoading: state is AuthLoading,
-                          onPressed: () {
-                            setState(() {
-                              _localErrorMessage = null;
-                            });
-                            if (_passwordController.text != _confirmPasswordController.text) {
-                              setState(() {
-                                _localErrorMessage = 'Password tidak cocok';
-                              });
-                              return;
-                            }
-                            context.read<AuthBloc>().add(
-                                  RegisterSubmitted(
-                                    nama: _namaController.text,
-                                    email: _emailController.text,
-                                    noHp: _noHpController.text,
-                                    password: _passwordController.text,
-                                  ),
-                                );
-                          },
+                      Form(
+                        key: _formKey,
+                        child: Column(
+                          children: [
+                            CustomTextField(
+                              label: 'Nama Lengkap',
+                              hint: 'Nama sesuai KTP/SIM',
+                              controller: _namaController,
+                              validator: (val) => val == null || val.trim().isEmpty ? 'Nama wajib diisi' : null,
+                            ),
+                            const SizedBox(height: 16),
+                            CustomTextField(
+                              label: 'Email',
+                              hint: 'email@contoh.com',
+                              controller: _emailController,
+                              keyboardType: TextInputType.emailAddress,
+                              validator: (val) {
+                                if (val == null || val.trim().isEmpty) return 'Email wajib diisi';
+                                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(val)) return 'Format email tidak valid';
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 16),
+                            CustomTextField(
+                              label: 'Nomor HP',
+                              hint: '08xxxxxxxxx',
+                              controller: _noHpController,
+                              keyboardType: TextInputType.phone,
+                              validator: (val) {
+                                if (val == null || val.trim().isEmpty) return 'Nomor HP wajib diisi';
+                                if (!RegExp(r'^[0-9]+$').hasMatch(val)) return 'Hanya boleh berisi angka';
+                                if (val.length < 10) return 'Nomor HP terlalu pendek';
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 16),
+                            CustomTextField(
+                              label: 'Password',
+                              hint: 'Minimal 6 karakter',
+                              controller: _passwordController,
+                              obscureText: _obscurePassword,
+                              validator: (val) => val == null || val.length < 6 ? 'Password minimal 6 karakter' : null,
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                                  size: 16,
+                                  color: AppColors.textHint,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    _obscurePassword = !_obscurePassword;
+                                  });
+                                },
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            CustomTextField(
+                              label: 'Konfirmasi Password',
+                              hint: 'Tulis ulang password',
+                              controller: _confirmPasswordController,
+                              obscureText: _obscurePassword,
+                              validator: (val) {
+                                if (val == null || val.isEmpty) return 'Konfirmasi password wajib diisi';
+                                if (val != _passwordController.text) return 'Password tidak cocok';
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 32),
+                            SizedBox(
+                              width: double.infinity,
+                              child: CustomButton(
+                                label: 'Daftar Sekarang',
+                                isLoading: state is AuthLoading,
+                                onPressed: () {
+                                  setState(() {
+                                    _localErrorMessage = null;
+                                  });
+                                  if (_formKey.currentState!.validate()) {
+                                    if (_passwordController.text != _confirmPasswordController.text) {
+                                      setState(() {
+                                        _localErrorMessage = 'Password tidak cocok';
+                                      });
+                                      return;
+                                    }
+                                    context.read<AuthBloc>().add(
+                                          RegisterSubmitted(
+                                            nama: _namaController.text,
+                                            email: _emailController.text,
+                                            noHp: _noHpController.text,
+                                            password: _passwordController.text,
+                                          ),
+                                        );
+                                  }
+                                },
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],

@@ -101,9 +101,11 @@ class SupabaseLaporanDataSource {
 
   Future<void> updateLaporan(LaporanModel laporan) async {
     try {
+      final parsedId = int.tryParse(laporan.id);
+      if (parsedId == null) throw Exception("ID Laporan tidak valid");
       await _supabase.from('laporan').update({
         'status': laporan.status,
-      }).eq('id', int.parse(laporan.id));
+      }).eq('id', parsedId);
     } catch (e) {
       throw Exception('Gagal mengubah laporan: $e');
     }
@@ -111,7 +113,9 @@ class SupabaseLaporanDataSource {
 
   Future<void> deleteLaporan(String id) async {
     try {
-      await _supabase.rpc('soft_delete_laporan', params: {'laporan_id': int.parse(id)});
+      final parsedId = int.tryParse(id);
+      if (parsedId == null) throw Exception("ID Laporan tidak valid");
+      await _supabase.rpc('soft_delete_laporan', params: {'laporan_id': parsedId});
     } catch (e) {
       throw Exception('Gagal menghapus laporan: $e');
     }
@@ -119,7 +123,7 @@ class SupabaseLaporanDataSource {
 
   Future<void> deleteAllLaporanByUser(String userId) async {
     try {
-      await _supabase.rpc('soft_delete_all_laporan');
+      await _supabase.from('laporan').update({'is_deleted_by_user': true}).eq('user_id', userId);
     } catch (e) {
       throw Exception('Gagal menghapus semua laporan: $e');
     }

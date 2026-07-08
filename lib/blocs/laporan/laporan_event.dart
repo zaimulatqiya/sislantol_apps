@@ -18,6 +18,9 @@ class SubscribeLaporanRealtime extends LaporanEvent {
   List<Object?> get props => [userId];
 }
 
+/// Berhenti mendengarkan perubahan real-time pada tabel laporan
+class UnsubscribeLaporanRealtime extends LaporanEvent {}
+
 class LoadLaporan extends LaporanEvent {
   final String userId;
   final bool isRefresh;

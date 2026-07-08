@@ -18,6 +18,9 @@ class SubscribePenugasanRealtime extends PenugasanEvent {
   List<Object?> get props => [petugasId];
 }
 
+/// Berhenti mendengarkan perubahan real-time pada tabel penugasan
+class UnsubscribePenugasanRealtime extends PenugasanEvent {}
+
 class LoadPenugasan extends PenugasanEvent {
   final String petugasId;
   final bool isRefresh;

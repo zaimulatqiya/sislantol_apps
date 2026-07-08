@@ -2,8 +2,11 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../models/laporan_model.dart';
 import '../../core/constants/app_colors.dart';
+import '../../blocs/laporan/laporan_bloc.dart';
+import '../../blocs/laporan/laporan_state.dart';
 import '../../widgets/common/badge_status.dart';
 
 class DetailLaporanScreen extends StatelessWidget {
@@ -45,7 +48,7 @@ class DetailLaporanScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final LaporanModel laporan =
+    final LaporanModel initialLaporan =
         ModalRoute.of(context)!.settings.arguments as LaporanModel;
 
     return Scaffold(
@@ -54,10 +57,19 @@ class DetailLaporanScreen extends StatelessWidget {
         title: const Text('Detail Laporan',
             style: TextStyle(fontWeight: FontWeight.w600)),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
+      body: BlocBuilder<LaporanBloc, LaporanState>(
+        builder: (context, state) {
+          LaporanModel laporan = initialLaporan;
+          if (state is LaporanLoaded) {
+            try {
+              laporan = state.laporan.firstWhere((l) => l.id == initialLaporan.id);
+            } catch (_) {}
+          }
+
+          return SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Info Card
@@ -248,8 +260,10 @@ class DetailLaporanScreen extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
+      );
+    },
+  ),
+);
   }
 
   Widget _buildInfoRow(String label, String value, IconData icon) {

@@ -19,6 +19,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
   bool _obscurePassword = true;
 
   @override
@@ -142,45 +143,63 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           const SizedBox(height: 32),
 
-                        CustomTextField(
-                          label: 'Email',
-                          hint: 'Masukkan email anda',
-                          controller: _emailController,
-                          keyboardType: TextInputType.emailAddress,
-                        ),
-                        const SizedBox(height: 16),
-                        CustomTextField(
-                          label: 'Password',
-                          hint: 'Masukkan password anda',
-                          controller: _passwordController,
-                          obscureText: _obscurePassword,
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                              size: 16,
-                              color: AppColors.textHint,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _obscurePassword = !_obscurePassword;
-                              });
-                            },
-                          ),
-                        ),
-                        const SizedBox(height: 32),
-                        SizedBox(
-                          width: double.infinity,
-                          child: CustomButton(
-                            label: 'Masuk',
-                            isLoading: state is AuthLoading,
-                            onPressed: () {
-                              context.read<AuthBloc>().add(
-                                    LoginSubmitted(
-                                      email: _emailController.text,
-                                      password: _passwordController.text,
-                                    ),
-                                  );
-                            },
+                        Form(
+                          key: _formKey,
+                          child: Column(
+                            children: [
+                              CustomTextField(
+                                label: 'Email',
+                                hint: 'Masukkan email anda',
+                                controller: _emailController,
+                                keyboardType: TextInputType.emailAddress,
+                                validator: (val) {
+                                  if (val == null || val.trim().isEmpty) return 'Email wajib diisi';
+                                  if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(val)) return 'Format email tidak valid';
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 16),
+                              CustomTextField(
+                                label: 'Password',
+                                hint: 'Masukkan password anda',
+                                controller: _passwordController,
+                                obscureText: _obscurePassword,
+                                validator: (val) {
+                                  if (val == null || val.isEmpty) return 'Password wajib diisi';
+                                  return null;
+                                },
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                                    size: 16,
+                                    color: AppColors.textHint,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _obscurePassword = !_obscurePassword;
+                                    });
+                                  },
+                                ),
+                              ),
+                              const SizedBox(height: 32),
+                              SizedBox(
+                                width: double.infinity,
+                                child: CustomButton(
+                                  label: 'Masuk',
+                                  isLoading: state is AuthLoading,
+                                  onPressed: () {
+                                    if (_formKey.currentState!.validate()) {
+                                      context.read<AuthBloc>().add(
+                                            LoginSubmitted(
+                                              email: _emailController.text,
+                                              password: _passwordController.text,
+                                            ),
+                                          );
+                                    }
+                                  },
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         const SizedBox(height: 24),

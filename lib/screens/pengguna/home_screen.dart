@@ -142,7 +142,7 @@ class _BerandaPenggunaState extends State<_BerandaPengguna> {
                               ),
                               child: Center(
                                 child: Text(
-                                  user.nama.substring(0, 1).toUpperCase(),
+                                  user.nama.isNotEmpty ? user.nama.substring(0, 1).toUpperCase() : 'U',
                                   style: const TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,

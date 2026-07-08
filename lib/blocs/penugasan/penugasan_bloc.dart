@@ -14,6 +14,7 @@ class PenugasanBloc extends Bloc<PenugasanEvent, PenugasanState> {
   PenugasanBloc({required this.penugasanDataSource}) : super(PenugasanInitial()) {
     on<LoadPenugasan>(_onLoad);
     on<SubscribePenugasanRealtime>(_onSubscribeRealtime);
+    on<UnsubscribePenugasanRealtime>(_onUnsubscribeRealtime);
     on<UpdateStatusPenugasan>(_onUpdateStatus);
     on<SelesaikanTugas>(_onSelesaikan);
     on<DeletePenugasan>(_onDeletePenugasan);
@@ -68,6 +69,16 @@ class PenugasanBloc extends Bloc<PenugasanEvent, PenugasanState> {
           },
         )
         .subscribe();
+  }
+
+  Future<void> _onUnsubscribeRealtime(
+    UnsubscribePenugasanRealtime event,
+    Emitter<PenugasanState> emit,
+  ) async {
+    if (_realtimeChannel != null) {
+      await Supabase.instance.client.removeChannel(_realtimeChannel!);
+      _realtimeChannel = null;
+    }
   }
 
   Future<void> _onUpdateStatus(UpdateStatusPenugasan event, Emitter<PenugasanState> emit) async {

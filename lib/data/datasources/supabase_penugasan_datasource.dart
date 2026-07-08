@@ -98,11 +98,13 @@ class SupabasePenugasanDataSource {
 
   Future<void> deletePenugasan(String penugasanId) async {
     // Delete single assignment
-    await supabase.rpc('soft_delete_penugasan', params: {'p_penugasan_id': int.parse(penugasanId)});
+    final parsedId = int.tryParse(penugasanId);
+    if (parsedId == null) throw Exception("ID Penugasan tidak valid");
+    await supabase.rpc('soft_delete_penugasan', params: {'p_penugasan_id': parsedId});
   }
 
   Future<void> deleteAllPenugasanByPetugas(String petugasId) async {
     // Delete all assignments related to this petugas
-    await supabase.rpc('soft_delete_all_penugasan');
+    await supabase.from('penugasan').update({'is_deleted_by_petugas': true}).eq('petugas_id', petugasId);
   }
 }

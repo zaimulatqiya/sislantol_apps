@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../../models/user_model.dart';
@@ -11,25 +12,30 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final SupabaseAuthDataSource authDataSource;
 
   AuthBloc({required this.authDataSource}) : super(AuthInitial()) {
+    on<CheckLoginRequested>(_onCheckLogin);
     on<LoginSubmitted>(_onLogin);
     on<RegisterSubmitted>(_onRegister);
     on<LogoutRequested>(_onLogout);
     
     // Auto-login check when BLoC is created could also be added here
-    _checkLoginStatus();
+    add(CheckLoginRequested());
   }
 
-  Future<void> _checkLoginStatus() async {
+  Future<void> _onCheckLogin(CheckLoginRequested event, Emitter<AuthState> emit) async {
     final prefs = await SharedPreferences.getInstance();
     final userJson = prefs.getString('user_data');
-    if (userJson != null) {
+    final session = Supabase.instance.client.auth.currentSession;
+    
+    if (userJson != null && session != null) {
       try {
         final user = UserModel.fromJson(jsonDecode(userJson));
         emit(AuthSuccess(user: user));
       } catch (e) {
+        await prefs.remove('user_data');
         emit(AuthUnauthenticated());
       }
     } else {
+      await prefs.remove('user_data');
       emit(AuthUnauthenticated());
     }
   }
@@ -37,7 +43,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future<void> _onLogin(LoginSubmitted event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
-      final user = await authDataSource.login(event.email, event.password);
+      final user = await authDataSource.login(event.email, event.password).timeout(const Duration(seconds: 15));
       
       // Save session
       final prefs = await SharedPreferences.getInstance();
@@ -60,7 +66,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         role: 'pengguna',
       );
 
-      final registeredUser = await authDataSource.register(newUser, event.password);
+      final registeredUser = await authDataSource.register(newUser, event.password).timeout(const Duration(seconds: 15));
 
       // Save session
       final prefs = await SharedPreferences.getInstance();
@@ -74,6 +80,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _onLogout(LogoutRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
+    try {
+      await authDataSource.logout();
+    } catch (_) {}
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('user_data');
     await Future.delayed(const Duration(milliseconds: 500));
