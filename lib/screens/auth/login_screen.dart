@@ -8,6 +8,7 @@ import '../../blocs/auth/auth_state.dart';
 import '../../widgets/common/custom_button.dart';
 import '../../widgets/common/custom_text_field.dart';
 import '../../utils/network_ui_helper.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -74,10 +75,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             color: Colors.white.withOpacity(0.1),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
-                            Icons.local_shipping_outlined,
-                            size: 64,
-                            color: Colors.white,
+                          child: SvgPicture.asset(
+                            'assets/images/logo_1.svg',
+                            height: 64,
+                            width: 64,
+                            colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -207,7 +209,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             const Text(
-                              'Belum punya akun? ',
+                              'Belum punya akun pengguna? ',
                               style: TextStyle(
                                 fontSize: 13,
                                 color: AppColors.textBody,
