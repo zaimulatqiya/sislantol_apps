@@ -1,14 +1,7 @@
 import base64
 import re
 import io
-import sys
-import subprocess
-
-try:
-    from PIL import Image, ImageDraw
-except ImportError:
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "Pillow"])
-    from PIL import Image, ImageDraw
+from PIL import Image
 
 def create_icon():
     print("Reading SVG...")
@@ -26,17 +19,15 @@ def create_icon():
     print("Opening extracted image...")
     img = Image.open(io.BytesIO(img_data)).convert("RGBA")
 
-    # The image might be cropped, let's create a bounding box
-    # A circular white background
-    # Let's add some padding
+    # Create a solid white background (square) instead of transparent corners
+    # Android will automatically mask this square into a circle/squircle
     padding = int(max(img.width, img.height) * 0.15)
     size = max(img.width, img.height) + padding * 2
     
-    bg = Image.new('RGBA', (size, size), (0,0,0,0))
-    draw = ImageDraw.Draw(bg)
-    draw.ellipse((0, 0, size-1, size-1), fill="white")
+    bg = Image.new('RGBA', (size, size), (255, 255, 255, 255)) # Solid white
 
     # paste img onto bg centered
+    # the 3rd argument (img) acts as a mask to preserve transparency of the logo itself
     offset = ((size - img.width) // 2, (size - img.height) // 2)
     bg.paste(img, offset, img)
 
