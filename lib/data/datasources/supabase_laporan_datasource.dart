@@ -4,32 +4,54 @@ import '../../models/laporan_model.dart';
 
 class SupabaseLaporanDataSource {
   final _supabase = Supabase.instance.client;
-
   LaporanModel _mapToModel(Map<String, dynamic> json) {
-    return LaporanModel(
-      id: json['id'].toString(),
-      userId: json['user_id'] ?? '',
-      pelaporNama: json['pelapor_nama'] ?? '',
-      pelaporNoHp: json['pelapor_no_hp'] ?? '',
-      jenisKejadian: json['jenis_kejadian'] ?? 'lainnya',
-      lokasi: json['lokasi'] ?? '',
-      deskripsi: json['deskripsi'] ?? '',
-      fotoUrls: json['foto_urls'] != null ? List<String>.from(json['foto_urls']) : null,
-      status: json['status'] ?? 'menunggu',
-      createdAt: DateTime.parse(json['created_at']),
-      // Note: petugasNama and catatanPetugas usually fetched from relation or penugasan table, 
-      // but for simplicity we map directly if available in a view, or leave null for now
-      petugasNama: null,
-      catatanPetugas: json['alasan_tolak'],
-      selesaiAt: null,
-    );
+      String? calcTotalWaktu;
+      String? petugasNamaVal;
+      if (json['penugasan'] != null && (json['penugasan'] as List).isNotEmpty) {
+        final lastPenugasan = (json['penugasan'] as List).last;
+        
+        if (lastPenugasan['profiles'] != null) {
+          petugasNamaVal = lastPenugasan['profiles']['nama'];
+        }
+
+        if (lastPenugasan['menuju_lokasi_at'] != null && lastPenugasan['selesai_at'] != null) {
+          final start = DateTime.parse(lastPenugasan['menuju_lokasi_at']);
+          final end = DateTime.parse(lastPenugasan['selesai_at']);
+          final diff = end.difference(start);
+          if (diff.inMinutes < 60) {
+            calcTotalWaktu = '${diff.inMinutes} menit';
+          } else {
+            final hours = diff.inHours;
+            final mins = diff.inMinutes.remainder(60);
+            calcTotalWaktu = mins > 0 ? '$hours jam $mins menit' : '$hours jam';
+          }
+        }
+      }
+
+      return LaporanModel(
+        id: json['id'].toString(),
+        userId: json['user_id'] ?? '',
+        pelaporNama: json['pelapor_nama'] ?? '',
+        pelaporNoHp: json['pelapor_no_hp'] ?? '',
+        jenisKejadian: json['jenis_kejadian'] ?? 'lainnya',
+        nomorPolisi: json['nomor_polisi'] ?? '-',
+        lokasi: json['lokasi'] ?? '',
+        deskripsi: json['deskripsi'] ?? '',
+        fotoUrls: json['foto_urls'] != null ? List<String>.from(json['foto_urls']) : null,
+        status: json['status'] ?? 'menunggu',
+        createdAt: DateTime.parse(json['created_at']),
+        petugasNama: petugasNamaVal,
+        catatanPetugas: json['alasan_tolak'],
+        selesaiAt: null,
+        totalWaktuPenanganan: calcTotalWaktu,
+      );
   }
 
   Future<List<LaporanModel>> getLaporanByUser(String userId) async {
     try {
       final response = await _supabase
           .from('laporan')
-          .select()
+          .select('*, penugasan(menuju_lokasi_at, selesai_at, profiles(nama))')
           .eq('user_id', userId)
           .eq('is_deleted_by_user', false)
           .order('created_at', ascending: false);
@@ -44,7 +66,7 @@ class SupabaseLaporanDataSource {
     try {
       final response = await _supabase
           .from('laporan')
-          .select()
+          .select('*, penugasan(menuju_lokasi_at, selesai_at, profiles(nama))')
           .order('created_at', ascending: false);
       
       return (response as List).map((data) => _mapToModel(data)).toList();
@@ -89,6 +111,7 @@ class SupabaseLaporanDataSource {
         'pelapor_nama': laporan.pelaporNama,
         'pelapor_no_hp': laporan.pelaporNoHp,
         'jenis_kejadian': laporan.jenisKejadian,
+        'nomor_polisi': laporan.nomorPolisi,
         'lokasi': laporan.lokasi,
         'deskripsi': laporan.deskripsi,
         'foto_urls': uploadedUrls.isNotEmpty ? uploadedUrls : null,

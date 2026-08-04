@@ -32,6 +32,12 @@ class SupabasePenugasanDataSource {
         catatanAdmin: data['catatan_admin'] ?? '-',
         status: data['status'],
         createdAt: DateTime.parse(data['created_at']),
+        pelaporNama: laporanData?['pelapor_nama'],
+        nomorPolisi: laporanData?['nomor_polisi'],
+        menujuLokasiAt: data['menuju_lokasi_at'] != null ? DateTime.parse(data['menuju_lokasi_at']) : null,
+        tibaLokasiAt: data['tiba_lokasi_at'] != null ? DateTime.parse(data['tiba_lokasi_at']) : null,
+        prosesAt: data['proses_at'] != null ? DateTime.parse(data['proses_at']) : null,
+        selesaiAt: data['selesai_at'] != null ? DateTime.parse(data['selesai_at']) : null,
         fotoBuktiUrl: data['foto_bukti_url'],
         catatanPenutup: data['catatan_penutup'],
         fotoKejadianUrls: parsedFotoUrls,
@@ -40,14 +46,27 @@ class SupabasePenugasanDataSource {
   }
 
   Future<void> updateStatusPenugasan(String penugasanId, String status) async {
-    // 1. Ambil laporanId terkait
-    final data = await supabase.from('penugasan').select('laporan_id').eq('id', penugasanId).single();
+    // 1. Ambil laporanId dan timestamp terkait
+    final data = await supabase
+        .from('penugasan')
+        .select('laporan_id, menuju_lokasi_at, tiba_lokasi_at, proses_at')
+        .eq('id', penugasanId)
+        .single();
     final laporanId = data['laporan_id'];
 
-    // 2. Update status di tabel penugasan
-    await supabase.from('penugasan').update({
-      'status': status,
-    }).eq('id', penugasanId);
+    Map<String, dynamic> updateData = {'status': status};
+    final nowIso = DateTime.now().toUtc().toIso8601String();
+
+    if (status == 'menuju' && data['menuju_lokasi_at'] == null) {
+      updateData['menuju_lokasi_at'] = nowIso;
+    } else if (status == 'tiba' && data['tiba_lokasi_at'] == null) {
+      updateData['tiba_lokasi_at'] = nowIso;
+    } else if (status == 'proses' && data['proses_at'] == null) {
+      updateData['proses_at'] = nowIso;
+    }
+
+    // 2. Update status dan timestamp di tabel penugasan
+    await supabase.from('penugasan').update(updateData).eq('id', penugasanId);
 
     // 3. Sinkronisasi status ke tabel laporan agar Pengguna & Admin juga melihat updatenya
     await supabase.from('laporan').update({
@@ -87,7 +106,7 @@ class SupabasePenugasanDataSource {
       'status': 'selesai',
       'foto_bukti_url': joinedUrls,
       'catatan_penutup': catatanPenutup,
-      'selesai_at': DateTime.now().toIso8601String(),
+      'selesai_at': DateTime.now().toUtc().toIso8601String(),
     }).eq('id', penugasanId);
 
     // 4. Update status laporan menjadi selesai di tabel laporan

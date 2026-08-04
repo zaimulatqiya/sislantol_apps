@@ -10,9 +10,15 @@ class PenugasanModel {
   final String catatanAdmin;
   final String status; // 'ditugaskan'|'diterima'|'menuju'|'tiba'|'proses'|'selesai'
   final DateTime createdAt;
+  final String? pelaporNama;
+  final String? nomorPolisi;
   final String? fotoBuktiUrl;
   final String? catatanPenutup;
   final List<String>? fotoKejadianUrls;
+  final DateTime? menujuLokasiAt;
+  final DateTime? tibaLokasiAt;
+  final DateTime? prosesAt;
+  final DateTime? selesaiAt;
 
   String get displayJenisKejadian {
     if (jenisKejadian.toLowerCase() == 'lainnya' && deskripsi.startsWith('Jenis Kejadian: ')) {
@@ -48,6 +54,31 @@ class PenugasanModel {
     return deskripsi;
   }
 
+  String _formatDuration(Duration duration) {
+    if (duration.inMinutes < 60) {
+      return '${duration.inMinutes} menit';
+    } else {
+      final hours = duration.inHours;
+      final minutes = duration.inMinutes.remainder(60);
+      return minutes > 0 ? '$hours jam $minutes menit' : '$hours jam';
+    }
+  }
+
+  String get waktuTempuh {
+    if (tibaLokasiAt == null || menujuLokasiAt == null) return '-';
+    return _formatDuration(tibaLokasiAt!.difference(menujuLokasiAt!));
+  }
+
+  String get waktuPenanganan {
+    if (selesaiAt == null || prosesAt == null) return '-';
+    return _formatDuration(selesaiAt!.difference(prosesAt!));
+  }
+
+  String get totalWaktuPenanganan {
+    if (selesaiAt == null || menujuLokasiAt == null) return '-';
+    return _formatDuration(selesaiAt!.difference(menujuLokasiAt!));
+  }
+
   PenugasanModel({
     required this.id,
     required this.laporanId,
@@ -58,9 +89,15 @@ class PenugasanModel {
     required this.catatanAdmin,
     required this.status,
     required this.createdAt,
+    this.pelaporNama,
+    this.nomorPolisi,
     this.fotoBuktiUrl,
     this.catatanPenutup,
     this.fotoKejadianUrls,
+    this.menujuLokasiAt,
+    this.tibaLokasiAt,
+    this.prosesAt,
+    this.selesaiAt,
   });
 
   factory PenugasanModel.fromJson(Map<String, dynamic> json) {
@@ -74,9 +111,15 @@ class PenugasanModel {
       catatanAdmin: json['catatanAdmin'],
       status: json['status'],
       createdAt: DateTime.parse(json['createdAt']),
+      pelaporNama: json['pelaporNama'],
+      nomorPolisi: json['nomorPolisi'],
       fotoBuktiUrl: json['fotoBuktiUrl'],
       catatanPenutup: json['catatanPenutup'],
       fotoKejadianUrls: json['fotoKejadianUrls'] != null ? List<String>.from(json['fotoKejadianUrls']) : null,
+      menujuLokasiAt: json['menujuLokasiAt'] != null ? DateTime.parse(json['menujuLokasiAt']) : null,
+      tibaLokasiAt: json['tibaLokasiAt'] != null ? DateTime.parse(json['tibaLokasiAt']) : null,
+      prosesAt: json['prosesAt'] != null ? DateTime.parse(json['prosesAt']) : null,
+      selesaiAt: json['selesaiAt'] != null ? DateTime.parse(json['selesaiAt']) : null,
     );
   }
 
@@ -91,9 +134,15 @@ class PenugasanModel {
       'catatanAdmin': catatanAdmin,
       'status': status,
       'createdAt': createdAt.toIso8601String(),
+      'pelaporNama': pelaporNama,
+      'nomorPolisi': nomorPolisi,
       'fotoBuktiUrl': fotoBuktiUrl,
       'catatanPenutup': catatanPenutup,
       'fotoKejadianUrls': fotoKejadianUrls,
+      'menujuLokasiAt': menujuLokasiAt?.toIso8601String(),
+      'tibaLokasiAt': tibaLokasiAt?.toIso8601String(),
+      'prosesAt': prosesAt?.toIso8601String(),
+      'selesaiAt': selesaiAt?.toIso8601String(),
     };
   }
 
@@ -107,9 +156,15 @@ class PenugasanModel {
     String? catatanAdmin,
     String? status,
     DateTime? createdAt,
+    String? pelaporNama,
+    String? nomorPolisi,
     String? fotoBuktiUrl,
     String? catatanPenutup,
     List<String>? fotoKejadianUrls,
+    DateTime? menujuLokasiAt,
+    DateTime? tibaLokasiAt,
+    DateTime? prosesAt,
+    DateTime? selesaiAt,
   }) {
     return PenugasanModel(
       id: id ?? this.id,
@@ -121,9 +176,15 @@ class PenugasanModel {
       catatanAdmin: catatanAdmin ?? this.catatanAdmin,
       status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
+      pelaporNama: pelaporNama ?? this.pelaporNama,
+      nomorPolisi: nomorPolisi ?? this.nomorPolisi,
       fotoBuktiUrl: fotoBuktiUrl ?? this.fotoBuktiUrl,
       catatanPenutup: catatanPenutup ?? this.catatanPenutup,
       fotoKejadianUrls: fotoKejadianUrls ?? this.fotoKejadianUrls,
+      menujuLokasiAt: menujuLokasiAt ?? this.menujuLokasiAt,
+      tibaLokasiAt: tibaLokasiAt ?? this.tibaLokasiAt,
+      prosesAt: prosesAt ?? this.prosesAt,
+      selesaiAt: selesaiAt ?? this.selesaiAt,
     );
   }
 }

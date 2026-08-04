@@ -395,15 +395,27 @@ class _DetailTugasScreenState extends State<DetailTugasScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            'ID Laporan: #${_tugas.laporanId}',
-                            style: const TextStyle(fontSize: 13, color: AppColors.primary, fontWeight: FontWeight.bold),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'ID Laporan: #${_tugas.laporanId}',
+                                style: const TextStyle(fontSize: 12, color: AppColors.textHint, fontWeight: FontWeight.w500),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                _tugas.pelaporNama ?? 'Tanpa Nama',
+                                style: const TextStyle(fontSize: 18, color: AppColors.primary, fontWeight: FontWeight.bold),
+                              ),
+                            ],
                           ),
                           BadgeStatus(status: _tugas.status),
                         ],
                       ),
                       const Divider(height: 32, color: AppColors.border),
                       _buildInfoRow('Jenis Kejadian', _tugas.displayJenisKejadian.toUpperCase(), Icons.warning_amber_rounded),
+                      const SizedBox(height: 16),
+                      _buildInfoRow('Nomor Polisi', _tugas.nomorPolisi ?? '-', Icons.directions_car_outlined),
                       const SizedBox(height: 16),
                       _buildInfoRow('Lokasi', _tugas.lokasi, Icons.location_on_outlined),
                       const SizedBox(height: 16),

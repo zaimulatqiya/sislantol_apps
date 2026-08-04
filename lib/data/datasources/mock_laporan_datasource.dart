@@ -13,6 +13,7 @@ class MockLaporanDataSource {
       pelaporNama: 'Budi Santoso',
       pelaporNoHp: '081234567890',
       jenisKejadian: 'mogok',
+      nomorPolisi: 'B 1234 CD',
       lokasi: 'KM 12 Tol Surabaya - Gempol',
       deskripsi: 'Mesin mati tiba-tiba, butuh derek.',
       status: 'menunggu',
@@ -24,6 +25,7 @@ class MockLaporanDataSource {
       pelaporNama: 'Budi Santoso',
       pelaporNoHp: '081234567890',
       jenisKejadian: 'kecelakaan',
+      nomorPolisi: 'L 5678 EF',
       lokasi: 'KM 15 Arah Selatan',
       deskripsi: 'Tabrakan beruntun melibatkan 2 mobil',
       status: 'ditugaskan',
@@ -36,6 +38,7 @@ class MockLaporanDataSource {
       pelaporNama: 'Budi Santoso',
       pelaporNoHp: '081234567890',
       jenisKejadian: 'hambatan',
+      nomorPolisi: 'W 9012 GH',
       lokasi: 'GTO Sidoarjo',
       deskripsi: 'Pecah ban di bahu jalan',
       status: 'selesai',
@@ -43,6 +46,7 @@ class MockLaporanDataSource {
       petugasNama: 'Agus Petugas',
       catatanPetugas: 'Ban sudah diganti, pengguna melanjutkan perjalanan',
       selesaiAt: DateTime.now().subtract(const Duration(days: 1, minutes: -45)),
+      totalWaktuPenanganan: '45 menit',
     ),
   ];
 

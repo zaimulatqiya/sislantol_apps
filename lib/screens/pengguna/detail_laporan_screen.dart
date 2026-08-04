@@ -113,6 +113,8 @@ class DetailLaporanScreen extends StatelessWidget {
                         laporan.displayJenisKejadian.toUpperCase(),
                         Icons.warning_amber_rounded),
                     const SizedBox(height: 16),
+                    _buildInfoRow('Nomor Polisi', laporan.nomorPolisi, Icons.directions_car_outlined),
+                    const SizedBox(height: 16),
                     _buildInfoRow(
                         'Lokasi', laporan.lokasi, Icons.location_on_outlined),
                     const SizedBox(height: 16),
@@ -219,10 +221,25 @@ class DetailLaporanScreen extends StatelessWidget {
                         BadgeStatus(status: laporan.status),
                       ],
                     ),
-                    if (laporan.petugasNama != null) ...[
-                      const Divider(height: 32, color: AppColors.border),
-                      _buildInfoRow('Petugas Ditugaskan', laporan.petugasNama!,
-                          Icons.engineering_outlined),
+                    if (laporan.petugasNama != null && laporan.petugasNama!.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Ditangani oleh:',
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  color: AppColors.textBody,
+                                  fontWeight: FontWeight.w500)),
+                          Text(
+                            laporan.petugasNama!,
+                            style: const TextStyle(
+                                fontSize: 14,
+                                color: AppColors.textPrimary,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
                     ],
                     if (laporan.catatanPetugas != null) ...[
                       const SizedBox(height: 16),
@@ -297,6 +314,7 @@ class DetailLaporanScreen extends StatelessWidget {
   }
 
   String _formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+    final local = date.toLocal();
+    return '${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')}/${local.year} ${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
   }
 }

@@ -4,6 +4,7 @@ class LaporanModel {
   final String pelaporNama;
   final String pelaporNoHp;
   final String jenisKejadian; // 'mogok'|'kecelakaan'|'hambatan'
+  final String nomorPolisi;
   final String lokasi;
   final String deskripsi;
   final List<String>? fotoUrls;
@@ -12,6 +13,7 @@ class LaporanModel {
   final String? petugasNama;
   final String? catatanPetugas;
   final DateTime? selesaiAt;
+  final String? totalWaktuPenanganan;
 
   String get displayJenisKejadian {
     if (jenisKejadian.toLowerCase() == 'lainnya' && deskripsi.startsWith('Jenis Kejadian: ')) {
@@ -43,6 +45,7 @@ class LaporanModel {
     required this.pelaporNama,
     required this.pelaporNoHp,
     required this.jenisKejadian,
+    required this.nomorPolisi,
     required this.lokasi,
     required this.deskripsi,
     this.fotoUrls,
@@ -51,6 +54,7 @@ class LaporanModel {
     this.petugasNama,
     this.catatanPetugas,
     this.selesaiAt,
+    this.totalWaktuPenanganan,
   });
 
   factory LaporanModel.fromJson(Map<String, dynamic> json) {
@@ -67,6 +71,7 @@ class LaporanModel {
       pelaporNama: json['pelaporNama'],
       pelaporNoHp: json['pelaporNoHp'],
       jenisKejadian: json['jenisKejadian'],
+      nomorPolisi: json['nomorPolisi'] ?? '-',
       lokasi: json['lokasi'],
       deskripsi: json['deskripsi'],
       fotoUrls: parsedFotoUrls,
@@ -75,6 +80,7 @@ class LaporanModel {
       petugasNama: json['petugasNama'],
       catatanPetugas: json['catatanPetugas'],
       selesaiAt: json['selesaiAt'] != null ? DateTime.parse(json['selesaiAt']) : null,
+      totalWaktuPenanganan: json['totalWaktuPenanganan'],
     );
   }
 
@@ -85,6 +91,7 @@ class LaporanModel {
       'pelaporNama': pelaporNama,
       'pelaporNoHp': pelaporNoHp,
       'jenisKejadian': jenisKejadian,
+      'nomorPolisi': nomorPolisi,
       'lokasi': lokasi,
       'deskripsi': deskripsi,
       'fotoUrls': fotoUrls,
@@ -93,6 +100,7 @@ class LaporanModel {
       'petugasNama': petugasNama,
       'catatanPetugas': catatanPetugas,
       'selesaiAt': selesaiAt?.toIso8601String(),
+      'totalWaktuPenanganan': totalWaktuPenanganan,
     };
   }
 
@@ -102,6 +110,7 @@ class LaporanModel {
     String? pelaporNama,
     String? pelaporNoHp,
     String? jenisKejadian,
+    String? nomorPolisi,
     String? lokasi,
     String? deskripsi,
     List<String>? fotoUrls,
@@ -110,6 +119,7 @@ class LaporanModel {
     String? petugasNama,
     String? catatanPetugas,
     DateTime? selesaiAt,
+    String? totalWaktuPenanganan,
   }) {
     return LaporanModel(
       id: id ?? this.id,
@@ -117,6 +127,7 @@ class LaporanModel {
       pelaporNama: pelaporNama ?? this.pelaporNama,
       pelaporNoHp: pelaporNoHp ?? this.pelaporNoHp,
       jenisKejadian: jenisKejadian ?? this.jenisKejadian,
+      nomorPolisi: nomorPolisi ?? this.nomorPolisi,
       lokasi: lokasi ?? this.lokasi,
       deskripsi: deskripsi ?? this.deskripsi,
       fotoUrls: fotoUrls ?? this.fotoUrls,
@@ -125,6 +136,7 @@ class LaporanModel {
       petugasNama: petugasNama ?? this.petugasNama,
       catatanPetugas: catatanPetugas ?? this.catatanPetugas,
       selesaiAt: selesaiAt ?? this.selesaiAt,
+      totalWaktuPenanganan: totalWaktuPenanganan ?? this.totalWaktuPenanganan,
     );
   }
 }

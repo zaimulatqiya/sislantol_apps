@@ -38,6 +38,7 @@ class SubmitLaporan extends LaporanEvent {
   final String pelaporNama;
   final String pelaporNoHp;
   final String jenisKejadian;
+  final String nomorPolisi;
   final String lokasi;
   final String deskripsi;
   final List<String>? fotoPaths;
@@ -47,6 +48,7 @@ class SubmitLaporan extends LaporanEvent {
     required this.pelaporNama,
     required this.pelaporNoHp,
     required this.jenisKejadian,
+    required this.nomorPolisi,
     required this.lokasi,
     required this.deskripsi,
     this.fotoPaths,
@@ -58,6 +60,7 @@ class SubmitLaporan extends LaporanEvent {
         pelaporNama,
         pelaporNoHp,
         jenisKejadian,
+        nomorPolisi,
         lokasi,
         deskripsi,
         fotoPaths,

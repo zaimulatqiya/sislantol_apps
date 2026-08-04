@@ -97,6 +97,7 @@ class LaporanBloc extends Bloc<LaporanEvent, LaporanState> {
         pelaporNama: event.pelaporNama,
         pelaporNoHp: event.pelaporNoHp,
         jenisKejadian: event.jenisKejadian,
+        nomorPolisi: event.nomorPolisi,
         lokasi: event.lokasi,
         deskripsi: event.deskripsi,
         fotoUrls: event.fotoPaths, // mock as url array

@@ -24,6 +24,7 @@ class _LaporScreenState extends State<LaporScreen> {
   final _lokasiController = TextEditingController();
   final _deskripsiController = TextEditingController();
   final _jenisKejadianLainnyaController = TextEditingController();
+  final _nomorPolisiController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   final ImagePicker _picker = ImagePicker();
@@ -97,6 +98,7 @@ class _LaporScreenState extends State<LaporScreen> {
     _lokasiController.dispose();
     _deskripsiController.dispose();
     _jenisKejadianLainnyaController.dispose();
+    _nomorPolisiController.dispose();
     super.dispose();
   }
 
@@ -123,6 +125,7 @@ class _LaporScreenState extends State<LaporScreen> {
                 pelaporNama: authState.user.nama,
                 pelaporNoHp: authState.user.noHp,
                 jenisKejadian: _jenisKejadian,
+                nomorPolisi: _nomorPolisiController.text,
                 lokasi: _lokasiController.text,
                 deskripsi: deskripsiKirim.trim(),
                 fotoPaths: finalFotoPaths,
@@ -312,6 +315,24 @@ class _LaporScreenState extends State<LaporScreen> {
                     ),
                   ],
 
+                  const SizedBox(height: 16),
+
+                  CustomTextField(
+                    label: 'Nomor Polisi Kendaraan',
+                    hint: 'Misal: L 1234 AB',
+                    controller: _nomorPolisiController,
+                    textCapitalization: TextCapitalization.characters,
+                    validator: (val) {
+                      if (val == null || val.isEmpty) {
+                        return 'Nomor polisi wajib diisi';
+                      }
+                      final regex = RegExp(r'^[A-Z]{1,2}\s?\d{1,4}\s?[A-Z]{0,3}$');
+                      if (!regex.hasMatch(val)) {
+                        return 'Format nomor polisi tidak valid';
+                      }
+                      return null;
+                    },
+                  ),
                   const SizedBox(height: 16),
 
                   CustomTextField(
